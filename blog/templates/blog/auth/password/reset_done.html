@@ -1,0 +1,62 @@
+{% extends "blog/layouts/base.html" %}
+
+{% block title %}Email envoyé - BlogHub{% endblock %}
+
+{% block header_class %}bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors duration-300{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-blue-600 dark:from-green-400 dark:to-blue-500 text-white text-2xl mb-6">
+                ✉️
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
+                Email envoyé !
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
+                Un email contenant les instructions pour réinitialiser votre mot de passe a été envoyé à votre adresse email.
+            </p>
+        </div>
+
+        <!-- Information -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-600 p-8 transition-colors duration-300">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 mb-6 transition-colors duration-300">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400 dark:text-blue-300 transition-colors duration-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 transition-colors duration-300">
+                            Important
+                        </h3>
+                        <div class="mt-2 text-sm text-blue-700 dark:text-blue-400 transition-colors duration-300">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Vérifiez votre boîte de réception et vos spams</li>
+                                <li>Le lien expirera dans 24 heures</li>
+                                <li>Si vous ne recevez pas l'email, vérifiez l'adresse saisie</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liens de navigation -->
+            <div class="text-center space-y-4">
+                <a href="{% url 'blog:login' %}" 
+                   class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg inline-block">
+                    Retour à la connexion
+                </a>
+                
+                <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                    <a href="{% url 'blog:password_reset' %}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors duration-200">
+                        Renvoyer l'email de réinitialisation
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1053 @@
+{% extends "blog/layouts/base.html" %}
+
+{% block title %}{{ article.title }} - BlogHub{% endblock %}
+
+{% block extra_styles %}
+<style>
+/* Animation de shake pour les erreurs */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Breadcrumb et bouton retour -->
+    <div class="mb-6">
+        <a href="{% url 'blog:articles:list' %}"
+                class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors group">
+            <svg class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <span class="font-medium">Retour</span>
+        </a>
+    </div>
+
+
+    <!-- Actions de l'auteur -->
+    {% if is_author %}
+    <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Statut de l'article -->
+                <div class="flex items-center">
+                    {% if article.is_published %}
+                        <div class="flex items-center text-green-600 dark:text-green-400">
+                            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">{{ article.status_display }}</span>
+                        </div>
+                    {% elif article.is_draft %}
+                        <div class="flex items-center text-orange-600 dark:text-orange-400">
+                            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">{{ article.status_display }}</span>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center text-red-600 dark:text-red-400">
+                            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="font-medium">{{ article.status_display }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if article.published_at %}
+                        <span class="ml-3 text-sm text-gray-500 dark:text-gray-400">
+                            • Publié le {{ article.published_at|date:"d M Y à H:i" }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Boutons d'action -->
+            <div class="flex items-center space-x-2">
+                {% if article.is_published %}
+                    <button type="button" 
+                            class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                            onclick="openUnpublishModal()">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.243 4.243L9.88 9.88"/>
+                        </svg>
+                        Dépublier
+                    </button>
+                {% else %}
+                    <form method="post" action="{% url 'blog:articles:publish' article.id %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            Publier
+                        </button>
+                    </form>
+                {% endif %}
+
+                <!-- Bouton d'édition (optionnel pour plus tard) -->
+                <a href="#" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Éditer
+                </a>
+
+                <!-- Bouton de suppression -->
+                <button type="button" 
+                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                        onclick="openDeleteModal()">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Article principal -->
+    <article class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-8 transition-colors duration-300">
+        
+        <div class="relative h-64 md:h-80 overflow-hidden">
+            <img src="{{ article.image.url }}" 
+                 alt="{{ article.title }}" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+            
+            <!-- Actions en overlay -->
+            <div class="absolute top-4 right-4 flex items-center space-x-3">
+                <!-- Bookmark -->
+                {% if not is_author %}
+                <button onclick="toggleBookmark(this, '{{ article.id }}')"
+                    class="bookmark-btn bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 transition-all duration-200 hover:scale-110 group/bookmark"
+                    data-bookmarked="{% if user_bookmarked %}true{% else %}false{% endif %}">
+                    {% if user_bookmarked %}
+                        <svg class="h-5 w-5 text-yellow-500 transition-colors"
+                            fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                    {% else %}
+                        <svg class="h-5 w-5 text-gray-600 group-hover/bookmark:text-yellow-500 transition-colors"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                    {% endif %}
+                </button>
+                {% else %}
+                <!-- Bouton bookmark désactivé pour l'auteur -->
+                <div class="bg-white/50 backdrop-blur-sm rounded-full p-3 cursor-not-allowed opacity-50"
+                     title="Vous ne pouvez pas ajouter votre propre article aux favoris">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                </div>
+                {% endif %}
+                
+                <!-- Share -->
+                <button onclick="shareArticle()"
+                    class="bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-3 transition-all duration-200 hover:scale-110">
+                    <svg class="h-5 w-5 text-gray-600 hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Stats en overlay -->
+            <div class="absolute bottom-4 right-4">
+                <div class="flex items-center space-x-4">
+                    <!-- Vues -->
+                    <div class="flex items-center text-white">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span class="font-medium drop-shadow-sm">{{ article.views_count }}</span>
+                    </div>
+                    
+                    <!-- Commentaires -->
+                    <div class="flex items-center text-white">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="font-medium drop-shadow-sm">{{ comments.count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- En-tête de l'article -->
+        <div class="px-8 py-6">
+            <!-- Titre -->
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 leading-tight transition-colors duration-300">
+                {{ article.title }}
+            </h1>
+            
+            <!-- Catégorie -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium category-tag category-fade-in transition-colors text-white" 
+                        style="background-color: {{ article.category.color }};">
+                    <span class="mr-2">{{ article.category.icon }}</span>
+                    {{ article.category.name }}
+                </span>
+            </div>
+            
+            <!-- Méta-informations -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
+                <!-- Auteur et date -->
+                <div class="flex items-center">
+                    <a href="{% url 'blog:author_detail' article.author.pk %}" class="block hover:scale-105 transition-transform duration-200">
+                        {% if article.author.avatar %}
+                            <img src="{{ article.author.avatar.url }}" 
+                                 alt="{{ article.author.get_full_name }}" 
+                                 class="h-12 w-12 rounded-full object-cover">
+                        {% else %}
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full h-12 w-12 flex items-center justify-center">
+                                <span class="text-white font-medium text-lg">{{ article.author.username.0|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </a>
+                    <div class="ml-4">
+                        <a href="{% url 'blog:author_detail' article.author.pk %}" class="font-medium text-gray-900 dark:text-white transition-colors duration-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                            {{ article.author }}
+                        </a>
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                            <time datetime="{{ article.created_at|date:'Y-m-d' }}">
+                                {{ article.created_at|date:"d M Y" }}
+                            </time>
+                            <span class="mx-2">•</span>
+                            <span>{{ article.word_count }} mots</span>
+                            <span class="mx-2">•</span>
+                            <span>⏱️ {{ article.reading_time }} min de lecture</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions et stats -->
+                <div class="flex items-center space-x-4">
+                    <!-- Like button -->
+                    {% if not is_author %}
+                    <button onclick="toggleLike(this, '{{ article.id }}')"
+                        class="like-btn flex items-center space-x-2 px-4 py-2 rounded-full border transition-all duration-200 group
+                        {% if user_liked %}
+                            border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20 liked
+                        {% else %}
+                            border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20
+                        {% endif %}">
+                        <svg class="h-5 w-5 transition-colors
+                        {% if user_liked %}
+                            text-red-500 dark:text-red-400
+                        {% else %}
+                            text-gray-400 dark:text-gray-500 group-hover:text-red-500 dark:group-hover:text-red-400
+                        {% endif %}" 
+                        {% if user_liked %}fill="currentColor"{% else %}fill="none"{% endif %} 
+                        stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span class="like-count font-medium transition-colors
+                        {% if user_liked %}
+                            text-red-600 dark:text-red-400
+                        {% else %}
+                            text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400
+                        {% endif %}">{{ likes_count }}</span>
+                    </button>
+                    {% else %}
+                    <!-- Bouton like désactivé pour l'auteur -->
+                    <div class="flex items-center space-x-2 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-600 cursor-not-allowed opacity-50"
+                         title="Vous ne pouvez pas aimer votre propre article">
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span class="font-medium text-gray-400 dark:text-gray-500">{{ likes_count }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tags -->
+            {% if article.tags.all %}
+            <div class="flex flex-wrap gap-2 mb-6">
+                {% for tag in article.tags.all %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 group bg-{{ tag.color }}-100 text-{{ tag.color }}-700 border border-{{ tag.color }}-700"
+                      title="Tag: {{ tag.name }}">
+                    <span class="mr-1">#</span>
+                    {{ tag.name }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Contenu de l'article -->
+        <div class="px-8 pb-8">
+            <div class="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 leading-relaxed transition-colors duration-300">
+                {{ article.content|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Footer avec actions -->
+        <div class="bg-gray-50 dark:bg-gray-700 px-8 py-6 border-t border-gray-100 dark:border-gray-600 transition-colors duration-300">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <!-- Stats détaillées -->
+                    <div class="flex items-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </div>
+                    <div class="flex items-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        <span class="font-medium">{{ comments.count }}</span>
+                        <span class="ml-1">commentaire{{ comments.count|pluralize }}</span>
+                    </div>
+                </div>
+                
+                <!-- Actions de partage -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="shareOn('twitter')" class="text-gray-400 dark:text-gray-500 hover:text-blue-400 dark:hover:text-blue-400 transition-colors">
+                        <span class="text-lg">🐦</span>
+                    </button>
+                    <button onclick="shareOn('facebook')" class="text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <span class="text-lg">📘</span>
+                    </button>
+                    <button onclick="shareOn('linkedin')" class="text-gray-400 dark:text-gray-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
+                        <span class="text-lg">💼</span>
+                    </button>
+                    <button onclick="copyLink()" class="text-gray-400 dark:text-gray-500 hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        <span class="text-lg">🔗</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- Section Commentaires -->
+    <section class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+        <!-- En-tête des commentaires -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 px-8 py-6 border-b border-gray-100 dark:border-gray-700 transition-colors duration-300">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center transition-colors duration-300">
+                <span class="mr-3">💬</span>
+                Commentaires 
+                <span class="ml-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-800 dark:to-purple-800 text-blue-800 dark:text-blue-200 text-sm font-medium px-3 py-1 rounded-full transition-colors duration-300">
+                    {{ comments.count }}
+                </span>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2 transition-colors duration-300">Partagez votre opinion sur cet article</p>
+        </div>
+
+        <!-- Formulaire d'ajout de commentaire -->
+        <div class="px-8 py-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 transition-colors duration-300">
+            {% if user.is_authenticated %}
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+                    <span class="mr-2">✏️</span>
+                    Ajouter un commentaire
+                </h3>
+                
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label for="{{ comment_form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                            {{ comment_form.content.label }}
+                        </label>
+                        {{ comment_form.content }}
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-xl transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                            <span class="mr-2">📝</span>
+                            Publier le commentaire
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <!-- Message pour utilisateurs non connectés -->
+                <div class="text-center py-8">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                        <div class="text-4xl mb-4">🔒</div>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 transition-colors duration-300">Connectez-vous pour commenter</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6 transition-colors duration-300">Rejoignez notre communauté pour partager votre opinion sur cet article et échanger avec d'autres lecteurs.</p>
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <a href="{% url 'blog:login' %}" 
+                               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <span class="mr-2">👤</span>
+                                Se connecter
+                            </a>
+                            <a href="{% url 'blog:register' %}" 
+                               class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 font-medium rounded-xl border border-blue-200 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-200">
+                                <span class="mr-2">✨</span>
+                                Créer un compte
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Liste des commentaires -->
+        <div class="px-8 py-6">
+            {% if comments %}
+                <div class="space-y-6">
+                    {% for comment in comments %}
+                    <div class="bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-xl p-6 hover:shadow-md transition-all duration-300">
+                        <!-- En-tête du commentaire -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center">
+                                {% if comment.author.avatar %}
+                                    <img src="{{ comment.author.avatar.url }}" 
+                                         alt="{{ comment.author.get_full_name }}" 
+                                         class="h-10 w-10 rounded-full object-cover">
+                                {% else %}
+                                    <div class="bg-gradient-to-r from-green-400 to-blue-400 rounded-full h-10 w-10 flex items-center justify-center">
+                                        <span class="text-white font-medium">
+                                            {% if comment.author.first_name %}
+                                                {{ comment.author.first_name.0|upper }}
+                                            {% else %}
+                                                {{ comment.author.username.0|upper }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                <div class="ml-3">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white transition-colors duration-300">
+                                        {% if comment.author.get_full_name %}
+                                            {{ comment.author.get_full_name }}
+                                        {% else %}
+                                            {{ comment.author.username }}
+                                        {% endif %}
+                                    </h4>
+                                    <time class="text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300" datetime="{{ comment.created_at|date:'Y-m-d' }}">
+                                        {{ comment.created_at|date:"d/m/Y à H:i" }}
+                                    </time>
+                                </div>
+                            </div>
+                            
+                            <!-- Bouton de suppression si c'est notre commentaire -->
+                             <!-- Condition if authenticated et si soit on est l'auteur du message soit on est staff -->
+                            {% if user.is_authenticated and comment.author == user or user.is_superuser %}
+                                <form method="post" action="{% url 'blog:articles:delete_comment' comment.id %}" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?');"
+                                      class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full p-2 transition-all duration-200 group">
+                                        <svg class="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Contenu du commentaire -->
+                        <div class="prose prose-sm max-w-none">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-0 transition-colors duration-300">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="text-4xl mb-4">💭</div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300">Aucun commentaire pour le moment</h3>
+                    <p class="text-gray-600 dark:text-gray-400 transition-colors duration-300">Soyez le premier à partager votre opinion sur cet article.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Articles recommandés -->
+    {% if recommended_articles and recommended_articles|length > 0 %}
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors duration-300">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+            <span class="mr-2">🔗</span>
+            Articles recommandés
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for recommended_article in recommended_articles %}
+            <a href="{% url 'blog:articles:detail' recommended_article.slug %}" class="group h-full">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300 h-full flex flex-col">
+                    <div class="flex items-center mb-3">
+                        <span class="text-white text-xs font-medium px-2 py-1 rounded-full flex items-center" 
+                            style="background-color: {{ recommended_article.category.color }};">
+                            <span class="mr-1">{{ recommended_article.category.icon }}</span>
+                            {{ recommended_article.category.name }}
+                        </span>
+                        <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
+                            👁️ {{ recommended_article.views_count }} vues
+                        </span>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        {{ recommended_article.title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 flex-grow">
+                        {{ recommended_article.excerpt }}
+                    </p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-6">
+            <a href="{% url 'blog:articles:list' %}"
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-xl hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200">
+                <span class="mr-2">📚</span>
+                Voir tous les articles
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors duration-300">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+            <span class="mr-2">🔗</span>
+            Articles recommandés
+        </h3>
+        <div class="text-center py-8">
+            <div class="text-4xl mb-4">📚</div>
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2 transition-colors duration-300">Aucun article recommandé</h4>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 transition-colors duration-300">Il n'y a pas encore d'autres articles dans cette catégorie.</p>
+            <a href="{% url 'blog:articles:list' %}" 
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-xl hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-200">
+                <span class="mr-2">📚</span>
+                Voir tous les articles
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <!-- Modal de confirmation pour dépublier -->
+    {% if is_author and article.is_published %}
+    <div id="unpublishModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300">
+            <!-- En-tête de la modal -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                        <svg class="h-5 w-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        Dépublier cet article ?
+                    </h3>
+                    <button type="button" 
+                            onclick="closeUnpublishModal()"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenu de la modal -->
+            <div class="px-6 py-4">
+                <div class="mb-4">
+                    <div class="space-y-3">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                            Vous êtes sur le point de dépublier l'article <strong>"{{ article.title }}"</strong>.
+                        </p>
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
+                            <div class="flex items-start space-x-2">
+                                <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                                <div class="text-sm">
+                                    <p class="text-yellow-800 dark:text-yellow-200 font-medium">Conséquences :</p>
+                                    <ul class="text-yellow-700 dark:text-yellow-300 mt-1 space-y-1">
+                                        <li>• L'article ne sera plus visible publiquement</li>
+                                        <li>• Il sera marqué comme "Dépublié" dans votre profil</li>
+                                        <li>• Vous pourrez le republier à tout moment</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions de la modal -->
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 rounded-b-2xl">
+                <div class="flex items-center justify-end space-x-3">
+                    <button type="button" 
+                            onclick="closeUnpublishModal()"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200">
+                        Annuler
+                    </button>
+                    <button type="button" 
+                            onclick="confirmUnpublish()"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.243 4.243L9.88 9.88"/>
+                        </svg>
+                        Dépublier l'article
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire caché pour la dépublication -->
+    <form id="unpublishForm" method="post" action="{% url 'blog:articles:unpublish' article.id %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- Modal de confirmation pour la suppression -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300">
+            <!-- En-tête de la modal -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                        <svg class="h-5 w-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        Supprimer définitivement cet article ?
+                    </h3>
+                    <button type="button" 
+                            onclick="closeDeleteModal()"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenu de la modal -->
+            <div class="px-6 py-4">
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4">🗑️</div>
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">Attention ! Action irréversible</h4>
+                    <p class="text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        L'article "<strong>{{ article.title }}</strong>" sera supprimé définitivement.
+                    </p>
+                </div>
+                
+                <!-- Avertissement -->
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-6 transition-colors duration-300">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400 dark:text-red-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h5 class="font-semibold text-red-800 dark:text-red-400 mb-2 transition-colors duration-300">
+                                Cette action supprimera définitivement :
+                            </h5>
+                            <ul class="text-sm text-red-700 dark:text-red-300 space-y-1 transition-colors duration-300">
+                                <li>• L'article et tout son contenu</li>
+                                <li>• Tous les commentaires associés ({{ article.comments.count }})</li>
+                                <li>• Tous les likes reçus ({{ article.likes.count }})</li>
+                                <li>• Toutes les vues enregistrées</li>
+                                <li>• Les favoris des utilisateurs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation par saisie -->
+                <div class="mb-6">
+                    <label for="deleteConfirmText" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                        Pour confirmer, tapez <strong>"SUPPRIMER"</strong> ci-dessous :
+                    </label>
+                    <input type="text" 
+                           id="deleteConfirmText"
+                           class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-300" 
+                           placeholder="Tapez SUPPRIMER ici..."
+                           autocomplete="off">
+                    <div id="deleteConfirmError" class="hidden mt-2 text-sm text-red-600 dark:text-red-400 flex items-center transition-colors duration-300">
+                        <span class="mr-1">❌</span>
+                        <span>Le texte de confirmation ne correspond pas.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions de la modal -->
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 rounded-b-2xl">
+                <div class="flex items-center justify-end space-x-3">
+                    <button type="button" 
+                            onclick="closeDeleteModal()"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors duration-200">
+                        Annuler
+                    </button>
+                    <button type="button" 
+                            onclick="confirmDelete()"
+                            id="deleteButton"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center opacity-50 cursor-not-allowed"
+                            disabled>
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Supprimer définitivement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire caché pour la suppression -->
+    <form id="deleteForm" method="post" action="{% url 'blog:articles:delete' article.id %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Fonction pour toggle les bookmarks avec helper AJAX
+function toggleBookmark(button, articleId) {
+    {% if user.is_authenticated %}
+    // Désactiver le bouton temporairement
+    button.disabled = true;
+    
+    // Utiliser notre helper AJAX centralisé
+    ajaxHelper.post(`/api/articles/${articleId}/bookmark/`)
+        .then(data => {
+            const svg = button.querySelector('svg');
+            const isBookmarked = data.bookmarked;
+            
+            // Mettre à jour l'attribut data
+            button.setAttribute('data-bookmarked', isBookmarked);
+            
+            if (isBookmarked) {
+                svg.setAttribute('fill', 'currentColor');
+                svg.classList.remove('text-gray-600');
+                svg.classList.add('text-yellow-500');
+                toast.success('Article ajouté aux favoris');
+            } else {
+                svg.setAttribute('fill', 'none');
+                svg.classList.remove('text-yellow-500');
+                svg.classList.add('text-gray-600');
+                toast.info('Article retiré des favoris');
+            }
+            
+            // Animation
+            button.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Gérer spécifiquement l'erreur 403 (auteur qui essaie de bookmarker son propre article)
+            if (error.status === 403) {
+                toast.warning('Vous ne pouvez pas ajouter votre propre article aux favoris');
+            } else {
+                toast.error('Erreur de connexion');
+            }
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+    {% else %}
+    toast.warning('Vous devez être connecté pour ajouter aux favoris');
+    {% endif %}
+}
+
+// Fonction pour toggle les likes avec helper AJAX
+function toggleLike(button, articleId) {
+    {% if user.is_authenticated %}
+    // Désactiver le bouton temporairement
+    button.disabled = true;
+    
+    // Utiliser notre helper AJAX centralisé
+    ajaxHelper.post(`/api/articles/${articleId}/like/`)
+        .then(data => {
+            const isLiked = data.liked;
+            const countSpan = button.querySelector('.like-count');
+            const svg = button.querySelector('svg');
+            
+            if (isLiked) {
+                button.classList.add('liked');
+                button.classList.remove('border-gray-200', 'dark:border-gray-600');
+                button.classList.add('border-red-300', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-900/20');
+                svg.setAttribute('fill', 'currentColor');
+                svg.classList.remove('text-gray-400', 'dark:text-gray-500');
+                svg.classList.add('text-red-500', 'dark:text-red-400');
+                countSpan.classList.remove('text-gray-700', 'dark:text-gray-300');
+                countSpan.classList.add('text-red-600', 'dark:text-red-400');
+                
+                // Animation de pulse
+                button.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    button.style.transform = 'scale(1)';
+                }, 200);
+                
+                toast.success('Article aimé !');
+            } else {
+                button.classList.remove('liked');
+                button.classList.remove('border-red-300', 'dark:border-red-500', 'bg-red-50', 'dark:bg-red-900/20');
+                button.classList.add('border-gray-200', 'dark:border-gray-600');
+                svg.setAttribute('fill', 'none');
+                svg.classList.remove('text-red-500', 'dark:text-red-400');
+                svg.classList.add('text-gray-400', 'dark:text-gray-500');
+                countSpan.classList.remove('text-red-600', 'dark:text-red-400');
+                countSpan.classList.add('text-gray-700', 'dark:text-gray-300');
+                
+                toast.info('Like retiré');
+            }
+            
+            // Mettre à jour le compteur
+            countSpan.textContent = data.likes_count;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Gérer spécifiquement l'erreur 403 (auteur qui essaie d'aimer son propre article)
+            if (error.status === 403) {
+                toast.warning('Vous ne pouvez pas aimer votre propre article');
+            } else {
+                toast.error('Erreur de connexion');
+            }
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+    {% else %}
+    toast.warning('Vous devez être connecté pour aimer un article');
+    {% endif %}
+}
+
+// Fonction de partage
+function shareArticle() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.title,
+            url: window.location.href
+        });
+    } else {
+        copyLink();
+    }
+}
+
+// Partage sur réseaux sociaux
+function shareOn(platform) {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    
+    let shareUrl = '';
+    
+    switch(platform) {
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+            break;
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            break;
+        case 'linkedin':
+            shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+    
+    console.log('Shared on:', platform);
+}
+
+// Copier le lien
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        // Animation de feedback
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<span class="text-lg">✅</span>';
+        
+        setTimeout(() => {
+            button.innerHTML = originalContent;
+        }, 2000);
+        
+        console.log('Link copied to clipboard');
+    });
+}
+
+// Animation d'entrée au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    const article = document.querySelector('article');
+    const commentsSection = document.querySelector('section');
+    
+    // Animation pour l'article
+    article.style.opacity = '0';
+    article.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        article.style.transition = 'all 0.6s ease-out';
+        article.style.opacity = '1';
+        article.style.transform = 'translateY(0)';
+    }, 100);
+    
+    // Animation pour les commentaires
+    setTimeout(() => {
+        commentsSection.style.opacity = '0';
+        commentsSection.style.transform = 'translateY(20px)';
+        commentsSection.style.transition = 'all 0.6s ease-out';
+        commentsSection.style.opacity = '1';
+        commentsSection.style.transform = 'translateY(0)';
+    }, 300);
+});
+
+// Fonctions pour la modal de dépublication
+function openUnpublishModal() {
+    document.getElementById('unpublishModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeUnpublishModal() {
+    document.getElementById('unpublishModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function confirmUnpublish() {
+    document.getElementById('unpublishForm').submit();
+}
+
+// Fonctions pour la modal de suppression
+function openDeleteModal() {
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteConfirmText = document.getElementById('deleteConfirmText');
+    
+    deleteModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus sur le champ de confirmation après un délai pour l'animation
+    setTimeout(() => {
+        if (deleteConfirmText) {
+            deleteConfirmText.focus();
+        }
+    }, 300);
+    
+    // Réinitialiser le formulaire
+    resetDeleteForm();
+}
+
+function closeDeleteModal() {
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    resetDeleteForm();
+}
+
+function resetDeleteForm() {
+    const deleteConfirmText = document.getElementById('deleteConfirmText');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteConfirmError = document.getElementById('deleteConfirmError');
+    
+    if (deleteConfirmText) {
+        deleteConfirmText.value = '';
+    }
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.classList.add('opacity-50', 'cursor-not-allowed');
+        deleteButton.classList.remove('opacity-100', 'cursor-pointer');
+    }
+    if (deleteConfirmError) {
+        deleteConfirmError.classList.add('hidden');
+    }
+}
+
+function validateDeleteConfirmation() {
+    const deleteConfirmText = document.getElementById('deleteConfirmText');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteConfirmError = document.getElementById('deleteConfirmError');
+    
+    if (!deleteConfirmText || !deleteButton) return;
+    
+    const value = deleteConfirmText.value.trim();
+    const isValid = value === 'SUPPRIMER';
+    
+    if (isValid) {
+        deleteButton.disabled = false;
+        deleteButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        deleteButton.classList.add('opacity-100', 'cursor-pointer');
+        if (deleteConfirmError) {
+            deleteConfirmError.classList.add('hidden');
+        }
+    } else {
+        deleteButton.disabled = true;
+        deleteButton.classList.add('opacity-50', 'cursor-not-allowed');
+        deleteButton.classList.remove('opacity-100', 'cursor-pointer');
+    }
+}
+
+function confirmDelete() {
+    const deleteConfirmText = document.getElementById('deleteConfirmText');
+    const deleteButton = document.getElementById('deleteButton');
+    const deleteConfirmError = document.getElementById('deleteConfirmError');
+    
+    const value = deleteConfirmText.value.trim();
+    
+    if (value !== 'SUPPRIMER') {
+        // Afficher l'erreur
+        if (deleteConfirmError) {
+            deleteConfirmError.classList.remove('hidden');
+        }
+        // Animation de shake
+        if (deleteConfirmText) {
+            deleteConfirmText.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                deleteConfirmText.style.animation = '';
+            }, 500);
+        }
+        return;
+    }
+    
+    // Désactiver le bouton pour éviter les clics multiples
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<span class="mr-2">⏳</span>Suppression en cours...';
+    }
+    
+    // Soumettre le formulaire
+    const deleteForm = document.getElementById('deleteForm');
+    if (deleteForm) {
+        deleteForm.submit();
+    }
+}
+
+// Event listeners pour la modal de suppression
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteConfirmText = document.getElementById('deleteConfirmText');
+    if (deleteConfirmText) {
+        deleteConfirmText.addEventListener('input', validateDeleteConfirmation);
+        deleteConfirmText.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const deleteButton = document.getElementById('deleteButton');
+                if (deleteButton && !deleteButton.disabled) {
+                    confirmDelete();
+                }
+            }
+        });
+    }
+    
+    // Fermer les modales avec Échap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const deleteModal = document.getElementById('deleteModal');
+            const unpublishModal = document.getElementById('unpublishModal');
+            
+            if (deleteModal && !deleteModal.classList.contains('hidden')) {
+                closeDeleteModal();
+            } else if (unpublishModal && !unpublishModal.classList.contains('hidden')) {
+                closeUnpublishModal();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

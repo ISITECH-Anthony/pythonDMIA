@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html lang="{{ LANGUAGE_CODE }}" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}BlogHub{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuration Tailwind pour le mode sombre
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        };
+        
+        // Initialisation du thème avant le rendu
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'blog/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'blog/css/toast.css' %}">
+    <style>
+        /* Amélioration pour le sous-dropdown de langue */
+        .group\/lang:hover .group-hover\/lang\:visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Assurer que le sous-dropdown apparaît au bon endroit */
+        .group\/lang {
+            position: relative;
+        }
+        
+        /* Animation pour la flèche de rotation */
+        .group\/lang:hover svg {
+            transform: rotate(90deg);
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen transition-colors duration-300">
+    <!-- Header -->
+    <header class="{% block header_class %}bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors duration-300{% endblock %}">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    {% block header_left %}
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                        <a href="{% url 'blog:home' %}">
+                            ✨ BlogHub
+                        </a>
+                    </h1>
+                    {% endblock %}
+                </div>
+
+                <!-- Navigation centrale -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="{% url 'blog:home' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200 relative group">
+                        {% trans "nav.home" %}
+                        <span
+                            class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                    </a>
+                    <a href="{% url 'blog:articles:list' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200 relative group">
+                        {% trans "nav.articles" %}
+                        <span
+                            class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                    </a>
+                    <a href="{% url 'blog:authors' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200 relative group">
+                        {% trans "nav.authors" %}
+                        <span
+                            class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                    </a>
+                    <a href="{% url 'blog:categories' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200 relative group">
+                        {% trans "nav.categories" %}
+                        <span
+                            class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                    </a>
+                    <a href="{% url 'blog:about' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors duration-200 relative group">
+                        {% trans "nav.about" %}
+                        <span
+                            class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                    </a>
+                </nav>
+
+                <!-- Menu mobile hamburger -->
+                <div class="md:hidden">
+                    <button type="button" id="mobile-menu-button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Boutons d'authentification -->
+                <div class="flex items-center space-x-4">
+                    {% block header_right %}
+                    {% if user.is_authenticated %}
+                    <!-- Menu utilisateur connecté -->
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'blog:articles:create' %}"
+                            class="inline-flex items-center px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 font-medium rounded-lg transition-all duration-200">
+                            <span class="mr-2">✍️</span>
+                            {% trans "button.write" %}
+                        </a>
+
+                        <!-- Avatar et menu déroulant -->
+                        <div class="relative group">
+                            <button
+                                class="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}"
+                                    class="h-8 w-8 rounded-full object-cover">
+                                {% else %}
+                                <div
+                                    class="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                                    {{ user.get_initials }}
+                                </div>
+                                {% endif %}
+                                <div class="flex flex-col">
+                                    <span class="font-medium">{{ user.get_full_name }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 text-left">@{{ user.username }}</span>
+                                </div>
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Menu déroulant -->
+                            <div
+                                class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 invisible group-hover:visible group-hover:opacity-100 opacity-0 transition-all duration-200 z-50">
+                                <div class="py-1">
+                                    <a href="{% url 'blog:users:profile' %}"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{% trans "user.profile" %}</a>
+                                    <a href="{% url 'blog:users:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{% trans "user.dashboard" %}</a>
+                                    
+                                    <!-- Sélecteur de langue avec sous-dropdown -->
+                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                    <div class="relative group/lang">
+                                        <button class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <span class="mr-2">🌐</span>
+                                                <span>Langue</span>
+                                            </div>
+                                            <svg class="h-4 w-4 transform group-hover/lang:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </button>
+                                        
+                                        <!-- Sous-dropdown des langues -->
+                                        <div class="absolute right-full top-0 mr-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 invisible group-hover/lang:visible group-hover/lang:opacity-100 opacity-0 transition-all duration-200 z-50">
+                                            <div class="py-1">
+                                                {% get_available_languages as LANGUAGES %}
+                                                {% for language_code, language_name in LANGUAGES %}
+                                                <form method="post" action="{% url 'set_language' %}" class="inline-block w-full">
+                                                    {% csrf_token %}
+                                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
+                                                    <input name="language" type="hidden" value="{{ language_code }}" />
+                                                    <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 {% if language_code == LANGUAGE_CODE %}bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400{% endif %}">
+                                                        <span class="mr-2">
+                                                            {% if language_code == 'fr' %}🇫🇷{% elif language_code == 'en' %}🇬🇧{% elif language_code == 'es' %}🇪🇸{% endif %}
+                                                        </span>
+                                                        {{ language_name }}
+                                                    </button>
+                                                </form>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bouton de basculement du thème dans le dropdown -->
+                                    <button id="theme-toggle-dropdown" 
+                                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                        <span id="theme-icon-dropdown" class="mr-2">🌙</span>
+                                        <span id="theme-text-dropdown">{% trans "theme.dark_mode" %}</span>
+                                    </button>
+                                    
+                                    {% if user.is_staff %}
+                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                    <a href="/admin/" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <span class="mr-2">⚙️</span>{% trans "admin.panel" %}
+                                    </a>
+                                    {% endif %}
+                                    <div class="border-t border-gray-100 dark:border-gray-600"></div>
+                                    <a href="{% url 'blog:logout' %}"
+                                        class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">{% trans "auth.logout" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Utilisateur non connecté -->
+                    <!-- Sélecteur de langue -->
+                    <div class="relative group">
+                        <button class="inline-flex items-center px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200">
+                            <span class="mr-2">🌐</span>
+                            <span>{% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE|upper }}</span>
+                            <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        <!-- Menu déroulant des langues -->
+                        <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 invisible group-hover:visible group-hover:opacity-100 opacity-0 transition-all duration-200 z-50">
+                            <div class="py-1">
+                                {% get_available_languages as LANGUAGES %}
+                                {% for language_code, language_name in LANGUAGES %}
+                                <form method="post" action="{% url 'set_language' %}" class="inline-block w-full">
+                                    {% csrf_token %}
+                                    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
+                                    <input name="language" type="hidden" value="{{ language_code }}" />
+                                    <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 {% if language_code == LANGUAGE_CODE %}bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400{% endif %}">
+                                        <span class="mr-2">
+                                            {% if language_code == 'fr' %}🇫🇷{% elif language_code == 'en' %}🇬🇧{% elif language_code == 'es' %}🇪🇸{% endif %}
+                                        </span>
+                                        {{ language_name }}
+                                    </button>
+                                </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bouton de basculement du thème -->
+                    <button id="theme-toggle" 
+                        class="inline-flex items-center px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    
+                    <a href="{% url 'blog:login' %}"
+                        class="inline-flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium border border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200">
+                        <span class="mr-2">👤</span>
+                        {% trans "auth.login" %}
+                    </a>
+                    {% endif %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            <!-- Menu mobile -->
+            <div id="mobile-menu" class="md:hidden hidden mt-4 pb-4 border-t border-gray-100 dark:border-gray-600">
+                <div class="flex flex-col space-y-3 pt-4">
+                    <a href="{% url 'blog:home' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {% trans "nav.home" %}
+                    </a>
+                    <a href="{% url 'blog:articles:list' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {% trans "nav.articles" %}
+                    </a>
+                    <a href="{% url 'blog:authors' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {% trans "nav.authors" %}
+                    </a>
+                    <a href="{% url 'blog:categories' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {% trans "nav.categories" %}
+                    </a>
+                    <a href="{% url 'blog:about' %}"
+                        class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {% trans "nav.about" %}
+                    </a>
+                    
+                    <!-- Bouton de thème pour mobile -->
+                    <div class="border-t border-gray-100 dark:border-gray-600 pt-3 mt-3">
+                        <button id="theme-toggle-mobile" 
+                            class="w-full text-left text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-3 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <span id="theme-icon-mobile" class="mr-2">🌙</span>
+                            <span id="theme-text-mobile">{% trans "theme.dark_mode" %}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="{% block main_class %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endblock %}">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3
+                        class="text-xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        ✨ BlogHub
+                    </h3>
+                    <p class="text-gray-300">
+                        {% trans "footer.description" %}
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">{% trans "footer.navigation" %}</h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="{% url 'blog:home' %}" class="text-gray-300 hover:text-white">
+                                {% trans "nav.home" %}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'blog:articles:create' %}" class="text-gray-300 hover:text-white">
+                                {% trans "footer.write_article" %}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">{% trans "footer.connect" %}</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">Facebook</span>
+                            📘
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">Twitter</span>
+                            🐦
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white">
+                            <span class="sr-only">LinkedIn</span>
+                            💼
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">
+                    {% trans "footer.copyright" %}
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'blog/js/ajax-helper.js' %}"></script>
+    <script src="{% static 'blog/js/toast.js' %}"></script>
+    <script>
+        // Menu mobile toggle
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function () {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Gestion du basculement de thème
+            function initThemeToggle() {
+                const theme = localStorage.getItem('theme') || 'light';
+                const html = document.documentElement;
+                const themeToggle = document.getElementById('theme-toggle');
+                const themeToggleDropdown = document.getElementById('theme-toggle-dropdown');
+                const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+                
+                // Fonction pour mettre à jour l'interface
+                function updateThemeUI(currentTheme) {
+                    const isDark = currentTheme === 'dark';
+                    
+                    // Mettre à jour les icônes et textes pour le bouton principal
+                    const themeIcon = document.getElementById('theme-icon');
+                    const themeText = document.getElementById('theme-text');
+                    if (themeIcon) themeIcon.textContent = isDark ? '☀️' : '🌙';
+                    if (themeText) themeText.textContent = isDark ? '{% trans "theme.light_mode" %}' : '{% trans "theme.dark_mode" %}';
+                    
+                    // Mettre à jour les icônes et textes pour le dropdown
+                    const themeIconDropdown = document.getElementById('theme-icon-dropdown');
+                    const themeTextDropdown = document.getElementById('theme-text-dropdown');
+                    if (themeIconDropdown) themeIconDropdown.textContent = isDark ? '☀️' : '🌙';
+                    if (themeTextDropdown) themeTextDropdown.textContent = isDark ? '{% trans "theme.light_mode" %}' : '{% trans "theme.dark_mode" %}';
+                    
+                    // Mettre à jour les icônes et textes pour le mobile
+                    const themeIconMobile = document.getElementById('theme-icon-mobile');
+                    const themeTextMobile = document.getElementById('theme-text-mobile');
+                    if (themeIconMobile) themeIconMobile.textContent = isDark ? '☀️' : '🌙';
+                    if (themeTextMobile) themeTextMobile.textContent = isDark ? '{% trans "theme.light_mode" %}' : '{% trans "theme.dark_mode" %}';
+                }
+                
+                // Fonction pour basculer le thème
+                function toggleTheme() {
+                    const currentTheme = localStorage.getItem('theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    
+                    localStorage.setItem('theme', newTheme);
+                    
+                    if (newTheme === 'dark') {
+                        html.classList.add('dark');
+                    } else {
+                        html.classList.remove('dark');
+                    }
+                    
+                    updateThemeUI(newTheme);
+                }
+                
+                // Initialiser l'interface
+                updateThemeUI(theme);
+                
+                // Ajouter les gestionnaires d'événements
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', toggleTheme);
+                }
+                if (themeToggleDropdown) {
+                    themeToggleDropdown.addEventListener('click', toggleTheme);
+                }
+                if (themeToggleMobile) {
+                    themeToggleMobile.addEventListener('click', toggleTheme);
+                }
+            }
+            
+            // Initialiser le basculement de thème
+            initThemeToggle();
+
+            // Conversion des messages Django en toasts
+            {% if messages %}
+                {% for message in messages %}
+                    // Conversion du type de message Django vers le type de toast
+                    let toastType = 'info';
+                    {% if message.tags %}
+                        const djangoTag = '{{ message.tags }}';
+                        if (djangoTag.includes('success')) {
+                            toastType = 'success';
+                        } else if (djangoTag.includes('error') || djangoTag.includes('danger')) {
+                            toastType = 'error';
+                        } else if (djangoTag.includes('warning')) {
+                            toastType = 'warning';
+                        } else if (djangoTag.includes('info')) {
+                            toastType = 'info';
+                        }
+                    {% endif %}
+                    
+                    // Afficher le toast
+                    if (window.toast) {
+                        window.toast.show('{{ message|escapejs }}', toastType, {
+                            duration: toastType === 'error' ? 6000 : 4000
+                        });
+                    }
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,982 @@
+{% extends "blog/layouts/base.html" %}
+{% load static %}
+
+{% block title %}Modifier un Article - BlogHub{% endblock %}
+
+{% block extra_styles %}{% endblock %}
+
+{% block main_class %}max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endblock %}
+
+{% block content %}
+<!-- Bouton de retour -->
+<div class="mb-6">
+    <a href="{% url 'blog:articles:list' %}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+        <svg class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="font-medium">Retour</span>
+    </a>
+</div>
+
+<!-- Formulaire principal -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-600 overflow-hidden transition-colors duration-300">
+    <!-- En-tête du formulaire -->
+    <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-8 py-6 border-b border-gray-100 dark:border-gray-600">
+        <div>
+            <h1
+                class="text-3xl font-bold text-gray-900 dark:text-white flex items-center bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                <span class="mr-3">✏️</span>
+                Modifier un Article
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">Modifiez les informations de votre article ci-dessous</p>
+        </div>
+    </div>
+
+    <!-- Contenu du formulaire -->
+    <div class="px-8 py-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Auteur (affiché en lecture seule) -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300"
+                style="animation-delay: 0.05s">
+                <label class="block text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">👤</span>
+                        Publié par
+                    </span>
+                </label>
+                <div class="flex items-center">
+                    <div class="bg-blue-100 dark:bg-blue-800 rounded-full p-2 mr-3 transition-colors duration-300">
+                        <svg class="h-5 w-5 text-blue-600 dark:text-blue-300 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <span class="text-blue-800 dark:text-blue-300 font-medium transition-colors duration-300">{{ user.username }}</span>
+                </div>
+            </div>
+
+            <!-- Titre de l'article -->
+            <div style="animation-delay: 0.1s">
+                <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">📰</span>
+                        Titre de l'article
+                        <span class="text-red-500 ml-1">*</span>
+                    </span>
+                </label>
+                <div class="relative">
+                    {{ form.title }}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </div>
+                </div>
+                {% if form.title.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
+                        {% for error in form.title.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">Un titre accrocheur qui résume votre article</p>
+            </div>
+
+            <!-- Catégories -->
+            <div style="animation-delay: 0.15s">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">📂</span>
+                        Catégorie
+                        <span class="text-red-500 ml-1">*</span>
+                    </span>
+                </label>
+
+                <!-- Input caché pour stocker la valeur sélectionnée -->
+                {{ form.category }}
+
+                <div id="category-display" class="grid grid-cols-4 gap-3 mb-3">
+                </div>
+
+                {% if form.category.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
+                        {% for error in form.category.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">Sélectionnez une catégorie qui correspond à votre article</p>
+                {% endif %}
+            </div>
+
+            <!-- Modal de sélection de catégories -->
+            <div id="category-modal"
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden transition-colors duration-300">
+                    <!-- En-tête de la modal -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center transition-colors duration-300">
+                                <span class="mr-2">📂</span>
+                                Choisir une catégorie
+                            </h3>
+                            <button id="close-modal" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barre de recherche -->
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                        <div class="relative">
+                            <input type="text" id="category-search" placeholder="Rechercher une catégorie..."
+                                class="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400 dark:text-gray-500 transition-colors duration-300" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grille de toutes les catégories -->
+                    <div class="px-6 py-4 max-h-96 overflow-y-auto">
+                        <div id="all-categories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                            <!-- Toutes les catégories seront générées par JavaScript -->
+                        </div>
+
+                        <!-- Message si aucune catégorie trouvée -->
+                        <div id="no-categories" class="hidden text-center py-8">
+                            <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4 transition-colors duration-300">🔍</div>
+                            <p class="text-gray-500 dark:text-gray-400 transition-colors duration-300">Aucune catégorie trouvée</p>
+                            <p class="text-sm text-gray-400 dark:text-gray-500 transition-colors duration-300">Essayez avec d'autres mots-clés</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div style="animation-delay: 0.2s">
+                <label for="{{ form.tags_input.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">🏷️</span>
+                        Tags
+                    </span>
+                </label>
+
+                <!-- Input visible pour saisir les tags -->
+                <div class="relative mb-3">
+                    {{ form.tags_input }}
+                    <!-- Compteur de caractères à l'intérieur de l'input -->
+                    <div class="absolute inset-y-0 right-0 pr-12 flex items-center pointer-events-none">
+                        <span id="tags-char-counter" class="text-xs text-gray-400 dark:text-gray-500 transition-all duration-200">0/20</span>
+                    </div>
+                    
+                    <!-- Icône à droite -->
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Champ caché pour les données des tags -->
+                {{ form.tags_data }}
+
+                <!-- Messages pour le système de tags -->
+                <div id="tags-messages" class="text-sm mt-2 mb-3">
+                    <!-- Message d'aide (affiché par défaut) -->
+                    <div id="tags-help" data-active="true" class="text-gray-500 dark:text-gray-400 flex justify-between items-start transition-colors duration-300">
+                        <span class="flex-1">
+                            Tapez un tag et appuyez sur <kbd class="px-2 py-1 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors duration-300">Entrée</kbd> pour l'ajouter.
+                        </span>
+                        <span id="tags-count" class="text-xs text-gray-400 dark:text-gray-500 transition-all duration-200 ml-4 whitespace-nowrap">0/5 tags</span>
+                    </div>
+                    
+                    <!-- Message d'erreur (caché par défaut) -->
+                    <div id="tags-error" data-active="false" class="text-red-500 dark:text-red-400 hidden flex justify-between items-start transition-colors duration-300">
+                        <span id="tags-error-text" class="flex-1"></span>
+                        <span class="text-xs text-red-400 dark:text-red-400 transition-all duration-200 ml-4 whitespace-nowrap">0/5 tags</span>
+                    </div>
+                    
+                    <!-- Messages prédéfinis pour l'internationalisation -->
+                    <div class="hidden">
+                        <span data-msg="max-tags">Maximum 5 tags autorisés</span>
+                        <span data-msg="min-length">Un tag doit contenir au moins 2 caractères</span>
+                        <span data-msg="max-length">Un tag ne peut pas dépasser 20 caractères</span>
+                        <span data-msg="invalid-chars">Un tag ne peut contenir que des lettres, chiffres, espaces et tirets</span>
+                        <span data-msg="duplicate">Ce tag existe déjà</span>
+                        <span data-msg="placeholder-initial">Ajoutez un tag...</span>
+                        <span data-msg="placeholder-max">Maximum 5 tags atteint</span>
+                    </div>
+                </div>
+
+                <!-- Conteneur pour l'affichage des tags -->
+                <div id="tags-container" class="flex flex-wrap gap-2 mb-3"></div>
+            </div>
+
+            <!-- Image d'illustration -->
+            <div style="animation-delay: 0.25s">
+                <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">🖼️</span>
+                        Image d'illustration
+                        {% if not article.image %}
+                            <span class="text-red-500 ml-1">*</span>
+                        {% endif %}
+                    </span>
+                </label>
+                
+                <!-- Affichage de l'image existante -->
+                {% if article.image %}
+                    <div class="mb-4 bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                            <span class="mr-2">🖼️</span>
+                            Image actuelle
+                        </p>
+                        <div class="relative">
+                            <img src="{{ article.image.url }}" alt="{{ article.title }}"
+                                class="w-full h-48 object-cover rounded-xl border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 transition-colors duration-300">
+                            Vous pouvez sélectionner une nouvelle image pour la remplacer
+                        </p>
+                    </div>
+                {% endif %}
+                
+                <div class="relative">
+                    {{ form.image }}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+                
+                {% if form.image.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
+                        {% for error in form.image.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <!-- Prévisualisation de l'image -->
+                <div id="image-preview" class="mt-3 hidden">
+                    <div class="relative">
+                        <img id="preview-img" src="" alt="Prévisualisation"
+                            class="w-full h-48 object-cover rounded-xl border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+                        <button type="button" id="remove-preview"
+                            class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                    {% if article.image %}
+                        Sélectionnez une nouvelle image pour remplacer l'image actuelle.
+                    {% else %}
+                        Ajoutez une image pour illustrer votre article.
+                    {% endif %}
+                    <span class="text-orange-600 dark:text-orange-400 transition-colors duration-300">Formats acceptés: JPG, PNG, WEBP</span>.
+                </p>
+            </div>
+
+            <!-- Contenu -->
+            <div style="animation-delay: 0.3s">
+                <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                    <span class="flex items-center">
+                        <span class="mr-2">📄</span>
+                        Contenu de l'article
+                        <span class="text-red-500 ml-1">*</span>
+                    </span>
+                </label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div class="mt-1 text-sm text-red-600 dark:text-red-400 transition-colors duration-300">
+                        {% for error in form.content.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                    Rédigez votre article. Vous pouvez utiliser des paragraphes en sautant des lignes.
+                </p>
+
+                <!-- Statistiques de l'article -->
+                <div class="mt-3 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="word-count">0 mot</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span id="reading-time">0 min de lecture</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 dark:text-gray-400 transition-colors duration-300">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span id="char-count">0 caractère</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100 dark:border-gray-600 transition-colors duration-300"
+                style="animation-delay: 0.4s">
+                <button type="submit" name="action" value="publish"
+                    class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl">
+                    <span class="mr-2">💾</span>
+                    {% if article.is_published %}
+                        Sauvegarder les modifications
+                    {% else %}
+                        Publier l'article
+                    {% endif %}
+                </button>
+                <button type="submit" name="action" value="draft"
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 font-medium rounded-xl hover:bg-orange-200 dark:hover:bg-orange-900/30 border border-orange-300 dark:border-orange-700 hover:border-orange-400 dark:hover:border-orange-600 transition-all duration-200">
+                    <span class="mr-2">📝</span>
+                    {% if article.is_published %}
+                        Dépublier et sauvegarder
+                    {% else %}
+                        Sauvegarder en brouillon
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Conseils de rédaction -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Conseils principaux -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-600 p-6 transition-colors duration-300"
+        style="animation-delay: 0.5s">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+            <span class="mr-2">💡</span>
+            Conseils pour un bon article
+        </h3>
+        <div class="space-y-4">
+            <div class="flex items-start">
+                <div class="bg-green-100 dark:bg-green-900/20 rounded-full p-2 mr-3 flex-shrink-0 transition-colors duration-300">
+                    <svg class="h-4 w-4 text-green-600 dark:text-green-400 transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white transition-colors duration-300">Titre accrocheur</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">Utilisez un titre clair et engageant qui donne envie de lire</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <div class="bg-blue-100 dark:bg-blue-900/20 rounded-full p-2 mr-3 flex-shrink-0 transition-colors duration-300">
+                    <svg class="h-4 w-4 text-blue-600 dark:text-blue-400 transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white transition-colors duration-300">Structure claire</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">Organisez votre contenu en paragraphes logiques et cohérents</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <div class="bg-purple-100 dark:bg-purple-900/20 rounded-full p-2 mr-3 flex-shrink-0 transition-colors duration-300">
+                    <svg class="h-4 w-4 text-purple-600 dark:text-purple-400 transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white transition-colors duration-300">Contenu original</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">Partagez vos idées personnelles et votre expertise unique</p>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <div class="bg-orange-100 dark:bg-orange-900/20 rounded-full p-2 mr-3 flex-shrink-0 transition-colors duration-300">
+                    <svg class="h-4 w-4 text-orange-600 dark:text-orange-400 transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white transition-colors duration-300">Relecture attentive</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">Vérifiez l'orthographe et la grammaire avant publication</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques en temps réel -->
+    <div class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl shadow-sm border border-blue-100 dark:border-blue-700 p-6 transition-colors duration-300"
+        style="animation-delay: 0.6s">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center transition-colors duration-300">
+            <span class="mr-2">📊</span>
+            Aperçu de votre article
+        </h3>
+        <div class="space-y-4">
+            <!-- Titre -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">Titre</span>
+                    <span id="title-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                        <span class="mr-1">📝</span>Non défini
+                    </span>
+                </div>
+                <p id="title-help" class="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">Ajoutez un titre accrocheur pour votre article</p>
+            </div>
+
+            <!-- Catégorie -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">Catégorie</span>
+                    <span id="category-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                        <span class="mr-1">📂</span>Non sélectionnée
+                    </span>
+                </div>
+                <p id="category-help" class="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">Choisissez une catégorie qui correspond à votre
+                    contenu</p>
+            </div>
+
+             <!-- Tags -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">Tags ajoutés</span>
+                    <span id="tags-preview-count" class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-300">0</span>
+                </div>
+                <p id="tags-preview-help" class="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">Ajoutez 2-3 tags pour optimiser la découverte de
+                    votre article</p>
+            </div>
+
+            <!-- Image -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">Image d'illustration</span>
+                    <span id="image-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                        <span class="mr-1">🖼️</span>Non ajoutée
+                    </span>
+                </div>
+                <p id="image-help" class="text-xs text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">Ajoutez une image pour illustrer votre article</p>
+            </div>
+
+            <!-- Longueur du contenu -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-blue-200 dark:border-blue-700 transition-colors duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">Longueur</span>
+                    <span id="length-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors duration-300">Commencez
+                        à écrire...</span>
+                </div>
+                <div class="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 transition-colors duration-300">
+                    <div id="length-progress"
+                        class="bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 h-2 rounded-full transition-all duration-300"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'blog/js/tags-manager.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Définition de toutes les catégories disponibles depuis la base de données
+        const allCategories = [
+            {% for category in categories %}
+            {
+                value: '{{ category.pk }}',
+                label: '{{ category.name|escapejs }}',
+                emoji: '{{ category.icon|escapejs }}',
+                color: 'blue',  // Couleur par défaut
+                slug: '{{ category.slug|escapejs }}',
+                description: '{{ category.description|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        let selectedCategory = null;
+
+        // Title
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        const titleStatusElement = document.getElementById('title-status');
+        const titleHelpElement = document.getElementById('title-help');
+        // Content
+        const contentTextarea = document.getElementById('{{ form.content.id_for_label }}');
+        const charCountElement = document.getElementById('char-count');
+        const wordCountElement = document.getElementById('word-count');
+        const readingTimeElement = document.getElementById('reading-time');
+        const lengthStatusElement = document.getElementById('length-status');
+        const lengthProgressElement = document.getElementById('length-progress');
+        // Catégories
+        const categoryStatusElement = document.getElementById('category-status');
+        const categoryHelpElement = document.getElementById('category-help');
+        const categoryDisplay = document.getElementById('category-display');
+        const categoryModal = document.getElementById('category-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const categorySearch = document.getElementById('category-search');
+        const allCategoriesGrid = document.getElementById('all-categories');
+        const noCategoriesMsg = document.getElementById('no-categories');
+        const selectedCategoryInput = document.getElementById('{{ form.category.id_for_label }}');
+        
+        // Récupérer la valeur de catégorie existante si elle existe (pour préserver après erreurs de validation)
+        const currentCategoryValue = selectedCategoryInput.value;
+        if (currentCategoryValue) {
+            selectedCategory = currentCategoryValue;
+        }
+
+        // Initialiser les valeurs existantes pour l'édition
+        {% if article.image %}
+            // L'image existe déjà, donc l'input n'est plus requis
+            const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+            if (imageInput) {
+                imageInput.removeAttribute('required');
+            }
+        {% endif %}
+
+        function updateTitleStatus() {
+            const title = titleInput.value.trim();
+
+            if (!title) {
+                titleStatusElement.innerHTML = '<span class="mr-1">📝</span>Non défini';
+                titleStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600';
+                titleHelpElement.textContent = 'Ajoutez un titre accrocheur pour votre article';
+            } else if (title.length < 10) {
+                titleStatusElement.innerHTML = '<span class="mr-1">⚠️</span>Trop court';
+                titleStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600';
+                titleHelpElement.textContent = 'Votre titre pourrait être plus descriptif';
+            } else if (title.length > 100) {
+                titleStatusElement.innerHTML = '<span class="mr-1">⚠️</span>Trop long';
+                titleStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-600';
+                titleHelpElement.textContent = 'Essayez de raccourcir votre titre';
+            } else {
+                titleStatusElement.innerHTML = '<span class="mr-1">✅</span>Parfait';
+                titleStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-600';
+                titleHelpElement.textContent = 'Titre de longueur idéale';
+            }
+        }
+
+        function updateContentStats() {
+            const text = contentTextarea.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            const chars = contentTextarea.value.length;
+            const readingTime = Math.max(1, Math.ceil(words / 200)); // ~200 mots par minute
+
+            // Mise à jour des compteurs
+            wordCountElement.textContent = words + ' mot' + (words !== 1 ? 's' : '');
+            charCountElement.textContent = chars + ' caractère' + (chars !== 1 ? 's' : '');
+            readingTimeElement.textContent = readingTime + ' min de lecture';
+
+            // Barre de progression (basée sur un article idéal de 500-1000 mots)
+            let progress = 0;
+            let status = '';
+            let statusClass = '';
+
+            if (words === 0) {
+                status = 'Commencez à écrire...';
+                statusClass = 'bg-gray-100 text-gray-600';
+            } else if (words < 100) {
+                progress = (words / 100) * 25;
+                status = 'Trop court';
+                statusClass = 'bg-red-100 text-red-600';
+            } else if (words < 300) {
+                progress = 25 + ((words - 100) / 200) * 25;
+                status = 'Court';
+                statusClass = 'bg-orange-100 text-orange-600';
+            } else if (words < 800) {
+                progress = 50 + ((words - 300) / 500) * 35;
+                status = 'Bon';
+                statusClass = 'bg-green-100 text-green-600';
+            } else if (words < 1500) {
+                progress = 85 + ((words - 800) / 700) * 15;
+                status = 'Excellent';
+                statusClass = 'bg-blue-100 text-blue-600';
+            } else {
+                progress = 100;
+                status = 'Très long';
+                statusClass = 'bg-purple-100 text-purple-600';
+            }
+
+            lengthProgressElement.style.width = progress + '%';
+            lengthStatusElement.textContent = status;
+            lengthStatusElement.className = 'text-xs px-2 py-1 rounded-full ' + statusClass;
+        }
+
+        // Fonction pour mettre à jour le statut de la catégorie
+        function updateCategoryStatus() {
+            const selectedValue = document.getElementById('id_category').value;
+
+            if (!selectedValue) {
+                categoryStatusElement.innerHTML = '<span class="mr-1">📂</span>Non sélectionnée';
+                categoryStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600';
+                categoryHelpElement.textContent = 'Choisissez une catégorie qui correspond à votre contenu';
+            } else {
+                const category = allCategories.find(cat => cat.value === selectedValue);
+                if (category) {
+                    categoryStatusElement.innerHTML = `<span class="mr-1">${category.emoji}</span>${category.label}`;
+                    categoryStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-600';
+                    categoryHelpElement.textContent = 'Catégorie sélectionnée avec succès';
+                }
+            }
+        }
+
+        // Fonction pour mettre à jour le statut de l'image
+        function updateImageStatus() {
+            const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+            const imageStatusElement = document.getElementById('image-status');
+            const imageHelpElement = document.getElementById('image-help');
+
+            if (!imageStatusElement || !imageHelpElement) {
+                return;
+            }
+
+            const hasUploadedImage = imageInput && imageInput.files && imageInput.files.length > 0;
+            const hasExistingImage = {% if article.image %}true{% else %}false{% endif %};
+
+            if (hasUploadedImage) {
+                imageStatusElement.innerHTML = '<span class="mr-1">✅</span>Nouvelle image sélectionnée';
+                imageStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300';
+                imageHelpElement.textContent = 'Nouvelle image sélectionnée pour remplacer l\'actuelle';
+            } else if (hasExistingImage) {
+                imageStatusElement.innerHTML = '<span class="mr-1">✅</span>Image existante';
+                imageStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300';
+                imageHelpElement.textContent = 'Image actuelle conservée';
+            } else {
+                imageStatusElement.innerHTML = '<span class="mr-1">🖼️</span>Non ajoutée';
+                imageStatusElement.className = 'text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
+                imageHelpElement.textContent = 'Ajoutez une image pour illustrer votre article';
+            }
+        }
+
+        // Fonction pour créer un élément de catégorie
+        function createCategoryElement(category, isSelected = false, isMainDisplay = false) {
+            const borderColor = `border-${category.color}-500`;
+            const bgColor = `bg-${category.color}-50 dark:bg-${category.color}-900/20`;
+            const textColor = `text-${category.color}-700 dark:text-${category.color}-300`;
+            const darkBorderColor = `dark:border-${category.color}-600`;
+            const darkRingColor = `dark:ring-${category.color}-700/30`;
+
+            return `
+            <button type="button" class="category-btn relative cursor-pointer ${isSelected ? 'selected' : ''}" data-value="${category.value}">
+                <div class="bg-white dark:bg-gray-800 border-2 ${isSelected ? borderColor + ' ' + darkBorderColor + ' ' + bgColor : 'border-gray-200 dark:border-gray-600'} rounded-xl p-3 text-center transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500 ${isSelected ? 'ring-2 ring-' + category.color + '-200 ' + darkRingColor : ''}">
+                    <span class="text-2xl mb-1 block">${category.emoji}</span>
+                    <span class="text-sm font-medium ${isSelected ? textColor : 'text-gray-700 dark:text-gray-300'}">${category.label}</span>
+                </div>
+                ${isSelected ? `<div class="absolute -top-1 -right-1 bg-${category.color}-500 dark:bg-${category.color}-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</div>` : ''}
+            </button>
+        `;
+        }
+
+        // Fonction pour créer le bouton "Voir plus"
+        function createMoreButton() {
+            return `
+            <button type="button" id="more-categories-btn" class="relative cursor-pointer">
+                <div class="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-3 text-center transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <span class="text-2xl mb-1 block">➕</span>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Voir plus</span>
+                </div>
+            </button>
+        `;
+        }
+
+        // Fonction pour afficher les catégories principales
+        function renderMainDisplay() {
+            let categoriesToShow = allCategories.slice(0, 3);
+
+            // Si une catégorie est sélectionnée, la mettre en première position
+            if (selectedCategory) {
+                const selectedCat = allCategories.find(cat => cat.value === selectedCategory);
+                if (selectedCat) {
+                    categoriesToShow = [selectedCat, ...allCategories.filter(cat => cat.value !== selectedCategory).slice(0, 2)];
+                }
+            }
+
+            let html = '';
+            categoriesToShow.forEach(category => {
+                html += createCategoryElement(category, category.value === selectedCategory, true);
+            });
+            
+            // Ajouter le bouton "Voir plus" seulement s'il y a plus de 3 catégories
+            if (allCategories.length > 3) {
+                html += createMoreButton();
+            }
+
+            categoryDisplay.innerHTML = html;
+
+            // Ajouter les event listeners pour les catégories principales
+            categoryDisplay.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    selectCategory(this.dataset.value);
+                });
+            });
+
+            // Ajouter l'event listener pour le bouton "Voir plus" seulement s'il existe
+            const moreBtn = document.getElementById('more-categories-btn');
+            if (moreBtn) {
+                moreBtn.addEventListener('click', function () {
+                    openModal();
+                });
+            }
+        }
+
+        // Fonction pour afficher toutes les catégories dans la modal
+        function renderAllCategories(filteredCategories = allCategories) {
+            if (filteredCategories.length === 0) {
+                allCategoriesGrid.classList.add('hidden');
+                noCategoriesMsg.classList.remove('hidden');
+                return;
+            }
+
+            allCategoriesGrid.classList.remove('hidden');
+            noCategoriesMsg.classList.add('hidden');
+
+            let html = '';
+            filteredCategories.forEach(category => {
+                html += createCategoryElement(category, category.value === selectedCategory);
+            });
+
+            allCategoriesGrid.innerHTML = html;
+
+            // Ajouter les event listeners pour toutes les catégories
+            allCategoriesGrid.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    selectCategory(this.dataset.value);
+                    closeModal();
+                });
+            });
+        }
+
+        // Fonction pour sélectionner une catégorie
+        function selectCategory(value) {
+            selectedCategory = value;
+            selectedCategoryInput.value = value;
+            renderMainDisplay();
+            renderAllCategories();
+
+            // Déclencher un événement personnalisé pour notifier le changement
+            const event = new CustomEvent('categoryChanged', { detail: { value: value } });
+            document.dispatchEvent(event);
+        }
+
+        // Fonction pour ouvrir la modal
+        function openModal() {
+            categoryModal.classList.remove('hidden');
+            categoryModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            renderAllCategories();
+            categorySearch.focus();
+        }
+
+        // Fonction pour fermer la modal
+        function closeModal() {
+            categoryModal.classList.add('hidden');
+            categoryModal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            categorySearch.value = '';
+        }
+
+        // Fonction de recherche
+        function searchCategories(query) {
+            if (!query.trim()) {
+                renderAllCategories();
+                return;
+            }
+
+            const filtered = allCategories.filter(category =>
+                category.label.toLowerCase().includes(query.toLowerCase()) ||
+                category.value.toLowerCase().includes(query.toLowerCase())
+            );
+            renderAllCategories(filtered);
+        }
+
+        // Event listeners
+        closeModalBtn.addEventListener('click', closeModal);
+
+        categoryModal.addEventListener('click', function (e) {
+            if (e.target === categoryModal) {
+                closeModal();
+            }
+        });
+
+        categorySearch.addEventListener('input', function (e) {
+            searchCategories(e.target.value);
+        });
+
+        // Échapper pour fermer la modal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !categoryModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Event listeners
+        contentTextarea.addEventListener('input', updateContentStats);
+        titleInput.addEventListener('input', updateTitleStatus);
+
+        document.addEventListener('categoryChanged', function (e) {
+            updateCategoryStatus();
+        });
+
+        // Event listener pour synchroniser le compteur de tags dans la section aperçu
+        document.addEventListener('tagsChanged', function (e) {
+            updateTagsPreviewStatus(e.detail);
+        });
+
+        // Fonction pour mettre à jour la section aperçu des tags
+        function updateTagsPreviewStatus(tagData) {
+            const previewCountElement = document.getElementById('tags-preview-count');
+            const previewHelpElement = document.getElementById('tags-preview-help');
+            
+            if (!previewCountElement || !previewHelpElement) {
+                return;
+            }
+
+            const count = tagData.count;
+            const maxTags = tagData.maxTags;
+
+            // Mettre à jour le compteur
+            previewCountElement.textContent = count.toString();
+
+            // Mettre à jour les styles selon le nombre de tags
+            previewCountElement.classList.remove('bg-gray-100', 'bg-green-100', 'bg-yellow-100', 'bg-red-100');
+            previewCountElement.classList.remove('text-gray-600', 'text-green-600', 'text-yellow-600', 'text-red-600');
+            previewCountElement.classList.remove('dark:bg-gray-700', 'dark:bg-green-900', 'dark:bg-yellow-900', 'dark:bg-red-900');
+            previewCountElement.classList.remove('dark:text-gray-300', 'dark:text-green-300', 'dark:text-yellow-300', 'dark:text-red-300');
+
+            // Mettre à jour le message d'aide
+            if (count === 0) {
+                previewCountElement.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                previewHelpElement.textContent = 'Ajoutez 2-3 tags pour optimiser la découverte de votre article';
+            } else if (count >= 2 && count <= 3) {
+                previewCountElement.classList.add('bg-green-100', 'dark:bg-green-900', 'text-green-600', 'dark:text-green-300');
+                previewHelpElement.textContent = 'Parfait ! Nombre de tags idéal pour la découverte';
+            } else if (count === 1) {
+                previewCountElement.classList.add('bg-yellow-100', 'dark:bg-yellow-900', 'text-yellow-600', 'dark:text-yellow-300');
+                previewHelpElement.textContent = 'Ajoutez encore 1-2 tags pour améliorer la découverte';
+            } else if (count >= maxTags) {
+                previewCountElement.classList.add('bg-red-100', 'dark:bg-red-900', 'text-red-600', 'dark:text-red-300');
+                previewHelpElement.textContent = 'Maximum de tags atteint';
+            } else {
+                previewCountElement.classList.add('bg-yellow-100', 'dark:bg-yellow-900', 'text-yellow-600', 'dark:text-yellow-300');
+                previewHelpElement.textContent = 'Bon nombre de tags, vous pouvez en ajouter quelques-uns de plus';
+            }
+        }
+
+        // Initialisation
+        renderMainDisplay();
+        updateContentStats();
+        updateTitleStatus();
+        updateCategoryStatus();
+        updateImageStatus();
+
+        // Initialisation spécifique à l'édition d'article
+        {% if article.image %}
+        // Si l'article a déjà une image, l'input n'est plus requis
+        const imageInputEdit = document.getElementById('{{ form.image.id_for_label }}');
+        if (imageInputEdit) {
+            imageInputEdit.removeAttribute('required');
+        }
+        {% endif %}
+
+        // si l'image est changée, afficher la prévisualisation
+        const imageInputForPreview = document.getElementById('{{ form.image.id_for_label }}');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const removePreviewBtn = document.getElementById('remove-preview');
+
+        imageInputForPreview.addEventListener('change', function () {
+            const file = imageInputForPreview.files[0];
+            if (file) {
+                // Validation du type de fichier
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+                
+                const fileName = file.name.toLowerCase();
+                const fileType = file.type.toLowerCase();
+                
+                // Vérifier l'extension
+                const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+                // Vérifier le type MIME
+                const hasValidType = allowedTypes.includes(fileType);
+                
+                if (!hasValidExtension || !hasValidType) {
+                    // Afficher une erreur
+                    alert('Format de fichier non supporté. Veuillez sélectionner une image au format JPG, PNG ou WebP.');
+                    imageInputForPreview.value = ''; // Vider le champ
+                    imagePreview.classList.add('hidden');
+                    updateImageStatus();
+                    return;
+                }
+                
+                // Validation de la taille (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('L\'image est trop volumineuse. La taille maximale autorisée est de 5 MB.');
+                    imageInputForPreview.value = '';
+                    imagePreview.classList.add('hidden');
+                    updateImageStatus();
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    
+                    // Mettre à jour le statut de l'image
+                    updateImageStatus();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+                imageInputForPreview.setAttribute('required', 'required');
+                
+                // Mettre à jour le statut de l'image
+                updateImageStatus();
+            }
+        });
+
+        // Gestion du bouton de suppression de prévisualisation
+        if (removePreviewBtn) {
+            removePreviewBtn.addEventListener('click', function() {
+                imagePreview.classList.add('hidden');
+                imageInputForPreview.value = '';
+                
+                // Remettre required car plus d'image
+                imageInputForPreview.setAttribute('required', 'required');
+                
+                // Mettre à jour le statut de l'image
+                updateImageStatus();
+            });
+        }
+    });
+</script>
+{% endblock %}

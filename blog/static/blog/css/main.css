@@ -1,0 +1,163 @@
+.prose {
+    max-width: none;
+}
+
+.prose p {
+    margin-bottom: 1.25rem;
+    line-height: 1.8;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+/* Styles pour les filtres de catégories modernes */
+.category-filter {
+    position: relative;
+    overflow: hidden;
+}
+
+.category-filter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.category-filter:hover::before {
+    left: 100%;
+}
+
+/* Délai d'animation pour créer un effet de cascade */
+.category-filter:nth-child(1) { animation-delay: 0.1s; }
+.category-filter:nth-child(2) { animation-delay: 0.2s; }
+.category-filter:nth-child(3) { animation-delay: 0.3s; }
+.category-filter:nth-child(4) { animation-delay: 0.4s; }
+.category-filter:nth-child(5) { animation-delay: 0.5s; }
+.category-filter:nth-child(6) { animation-delay: 0.6s; }
+.category-filter:nth-child(7) { animation-delay: 0.7s; }
+.category-filter:nth-child(8) { animation-delay: 0.8s; }
+
+/* Effet de pulsation pour le filtre actif */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+}
+
+.category-filter.active {
+    animation: pulse 2s infinite;
+}
+
+/* Effet de brillance au survol */
+.shimmer-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.6s ease-out;
+}
+
+.shimmer-effect:hover::after {
+    left: 100%;
+}
+
+/* Styles pour le compteur de badges */
+.badge-count {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.badge-count::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-filter:hover .badge-count::before {
+    opacity: 1;
+}
+
+/* Animation de rotation subtile pour les icônes */
+.category-icon {
+    transition: transform 0.3s ease;
+}
+
+.category-filter:hover .category-icon {
+    transform: rotate(5deg) scale(1.1);
+}
+
+/* Styles responsifs pour les filtres */
+@media (max-width: 768px) {
+    .category-filter {
+        flex: 1 1 auto;
+        min-width: max-content;
+    }
+    
+    .filter-container {
+        gap: 0.5rem;
+    }
+}
+
+/* Effet de focus amélioré */
+.category-filter:focus {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: 2px;
+    transform: scale(1.02);
+}
+
+/* Transition smooth pour le mode sombre */
+.category-filter,
+.category-filter * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

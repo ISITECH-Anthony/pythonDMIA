@@ -1,0 +1,87 @@
+{% load article_tags %}
+
+{% comment %}
+Composant de pagination réutilisable
+Paramètres attendus :
+- page_obj : objet de pagination Django
+- request : objet request pour préserver les paramètres URL
+
+Usage : {% include 'blog/components/pagination.html' with page_obj=articles request=request %}
+{% endcomment %}
+
+{% if page_obj.has_other_pages %}
+<div class="flex flex-wrap justify-center items-center gap-2 mt-12">
+    <!-- Page précédente -->
+    {% if page_obj.has_previous %}
+        <a href="{% pagination_url request page_obj.previous_page_number %}"
+            class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 font-medium"
+            title="Page précédente">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+    {% else %}
+        <span class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 rounded-lg cursor-not-allowed"
+            title="Aucune page précédente">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </span>
+    {% endif %}
+
+    <!-- Numéros de pages intelligents -->
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+            <!-- Page actuelle -->
+            <span class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-lg font-bold shadow-md">
+                {{ num }}
+            </span>
+        {% elif num|abs_diff:page_obj.number <= 2 %}
+            <!-- Pages proches -->
+            <a href="{% pagination_url request num %}"
+                class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 font-medium">
+                {{ num }}
+            </a>
+        {% elif num == 1 and page_obj.number > 4 %}
+            <!-- Première page + ellipsis -->
+            <a href="{% pagination_url request 1 %}"
+                class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 font-medium">
+                1
+            </a>
+            <span class="px-2 py-2 text-gray-400 dark:text-gray-500">...</span>
+        {% elif num == page_obj.paginator.num_pages and page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+            <!-- Ellipsis + dernière page -->
+            <span class="px-2 py-2 text-gray-400 dark:text-gray-500">...</span>
+            <a href="{% pagination_url request page_obj.paginator.num_pages %}"
+                class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 font-medium">
+                {{ num }}
+            </a>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Page suivante -->
+    {% if page_obj.has_next %}
+        <a href="{% pagination_url request page_obj.next_page_number %}"
+            class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200 font-medium"
+            title="Page suivante">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    {% else %}
+        <span class="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 rounded-lg cursor-not-allowed"
+            title="Aucune page suivante">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </span>
+    {% endif %}
+</div>
+
+<!-- Informations sur la pagination -->
+<div class="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+    <span>Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+    <span class="mx-2">•</span>
+    <span>{{ page_obj.paginator.count }} élément{{ page_obj.paginator.count|pluralize }} au total</span>
+</div>
+{% endif %}

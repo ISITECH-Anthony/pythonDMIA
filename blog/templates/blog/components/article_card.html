@@ -1,0 +1,154 @@
+{% load article_tags %}
+
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-600 overflow-hidden hover:shadow-lg group cursor-pointer transition-all duration-200 flex flex-col h-full" onclick="window.location.href='{% url 'blog:articles:detail' article.slug %}'">
+    <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden">
+        <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+        <!-- Stats détaillées en overlay -->
+        <div class="absolute bottom-3 left-3 right-3">
+            <div class="flex items-center justify-between">
+                <time class="text-white text-sm font-medium drop-shadow-sm"
+                    datetime="{{ article.created_at|date:'Y-m-d' }}">
+                    {{ article.created_at|date:"d M Y" }}
+                </time>
+
+                <!-- Stats avec icônes colorées -->
+                <div class="flex items-center space-x-3 text-sm">
+                    <div class="flex items-center text-red-500 group/like">
+                        <svg class="h-4 w-4 mr-1 transition-all duration-200" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                        <span class="like-count font-medium text-white drop-shadow-sm">{{ article.likes_count|default:0 }}</span>
+                    </div>
+
+                    <!-- Commentaires -->
+                    <div class="flex items-center text-blue-400">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="font-medium text-white drop-shadow-sm">{{ article.comments_count|default:0 }}</span>
+                    </div>
+
+                    <!-- Vues -->
+                    <div class="flex items-center text-purple-400">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span class="font-medium text-white drop-shadow-sm">{{ article.views_count|default:0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catégorie en overlay -->
+        <div class="absolute top-3 left-3 category-overlay-container">
+            <span class="text-white text-xs font-medium px-2 py-1 rounded-full flex items-center category-home-tag category-appear shadow-lg" style="background-color: {{ article.category.color }};">
+                <span class="mr-1">{{ article.category.icon }}</span>
+                {{ article.category.name }}
+            </span>
+        </div>
+
+        <!-- Bouton bookmark -->
+        <div class="absolute top-3 right-3">
+            <div class="bg-white/80 backdrop-blur-sm rounded-full p-2">
+                {% if article|is_bookmarked_by:user %}
+                    <svg class="h-5 w-5 text-yellow-500 dark:text-yellow-400 transition-colors"
+                        fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                {% else %}
+                    <svg class="h-5 w-5 text-gray-600 dark:text-gray-400"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6 flex-1 flex flex-col">
+        <!-- En-tête avec auteur et avatar -->
+        <div class="flex items-center mb-4">
+            <!-- Avatar de l'auteur -->
+            <div class="relative">
+                <a href="{% url 'blog:author_detail' article.author.pk %}" class="block" onclick="event.stopPropagation();">
+                    {% if article.author.avatar %}
+                        <img src="{{ article.author.avatar.url }}" 
+                                alt="Avatar de {{ article.author.get_full_name|default:article.author.username }}"
+                                class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm hover:scale-110 transition-transform duration-200">
+                    {% else %}
+                        <div class="bg-gradient-to-r from-blue-400 to-purple-400 rounded-full h-10 w-10 flex items-center justify-center border-2 border-white shadow-sm hover:scale-110 transition-transform duration-200">
+                            <span class="text-white text-sm font-medium">
+                                {{ article.author.first_name.0|default:article.author.username.0|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </a>
+            </div>
+            
+            <div class="ml-3">
+                <a href="{% url 'blog:author_detail' article.author.pk %}" class="text-gray-900 dark:text-white text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors" onclick="event.stopPropagation();">
+                    {{ article.author.get_full_name|default:article.author.username }}
+                </a>
+                <p class="text-gray-500 dark:text-gray-400 text-xs transition-colors duration-300">
+                    {{ article.created_at|timesince }} ago
+                </p>
+            </div>
+        </div>
+
+        <!-- Titre de l'article -->
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {{ article.title }}
+        </h3>
+
+        <!-- Extrait du contenu -->
+        <div class="mb-4">
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3 text-sm transition-colors duration-300">
+                {{ article.content|truncatewords:25 }}
+            </p>
+        </div>
+
+        <!-- Tags dynamiques avec limitation intelligente -->
+        {% if article.tags.all %}
+        <div class="flex flex-wrap gap-2 mb-4">
+            {% for tag in article.tags.all|slice:":3" %}
+            <span class="text-xs font-medium px-2 py-1 rounded-full transition-all duration-200 hover:scale-105 bg-{{ tag.color }}-100 dark:bg-{{ tag.color }}-700 text-{{ tag.color }}-800 dark:text-{{ tag.color }}-200">
+                #{{ tag.name }}
+            </span>
+            {% endfor %}
+            {% if article.tags.count > 3 %}
+            <span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-2 py-1 rounded-full transition-colors duration-300">
+                +{{ article.tags.count|add:"-3" }} tag{{ article.tags.count|add:"-3"|pluralize }}
+            </span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Footer avec temps de lecture et un lien vers l'article -->
+        <div class="pt-4 border-t border-gray-100 dark:border-gray-700 transition-colors duration-300 mt-auto">
+            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">
+                <span class="flex items-center">
+                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {{ article.reading_time }} min de lecture
+                </span>
+                <span class="text-xs font-semibold flex items-center">
+                    Lire l'article
+                    <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

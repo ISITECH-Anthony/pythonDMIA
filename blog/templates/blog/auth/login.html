@@ -1,0 +1,106 @@
+{% extends 'blog/layouts/base.html' %}
+
+{% block title %}Connexion - BlogHub{% endblock %}
+
+{% block header_class %}bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors duration-300{% endblock %}
+
+{% block header_right %}
+<a href="{% url 'blog:register' %}" 
+   class="inline-flex items-center px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium border border-blue-200 dark:border-blue-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200">
+    <span class="mr-2">✨</span>
+    S'inscrire
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500 text-white text-2xl mb-6">
+                👤
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Connexion
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+                Connectez-vous à votre compte BlogHub
+            </p>
+        </div>
+
+        <!-- Formulaire de connexion -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-600 p-8 transition-colors duration-300">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-xl {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Email -->
+                <div>
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.username.label }}
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.username.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Mot de passe -->
+                <div>
+                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.password.label }}
+                    </label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="mt-1 text-sm text-red-600 dark:text-red-400">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Erreurs non-field -->
+                {% if form.non_field_errors %}
+                    <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                {% endif %}
+
+                <!-- Lien mot de passe oublié -->
+                <div class="text-right mb-4">
+                    <a href="{% url 'blog:password_reset' %}" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <!-- Bouton de connexion -->
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition duration-300 transform hover:scale-105 shadow-lg">
+                    <span class="mr-2">🔐</span>
+                    Se connecter
+                </button>
+            </form>
+
+            <!-- Lien vers l'inscription -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-600 dark:text-gray-300">
+                    Pas encore de compte ?
+                    <a href="{% url 'blog:register' %}" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                        Créer un compte
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

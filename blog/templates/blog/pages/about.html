@@ -1,0 +1,208 @@
+{% extends "blog/layouts/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "about.title" %} | BlogHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- En-tête de la page -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            {% trans "about.title" %}
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            {% trans "about.subtitle" %}
+        </p>
+    </div>
+
+    <!-- Section Mission -->
+    <section class="mb-16">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-2xl">🎯</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {% trans "about.mission.title" %}
+                </h2>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                {% trans "about.mission.description" %}
+            </p>
+        </div>
+    </section>
+
+    <!-- Section Vision -->
+    <section class="mb-16">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-2xl">👁️</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {% trans "about.vision.title" %}
+                </h2>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                {% trans "about.vision.description" %}
+            </p>
+        </div>
+    </section>
+
+    <!-- Section Valeurs -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            {% trans "about.values.title" %}
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Créativité -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">🎨</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    {% trans "about.values.creativity.title" %}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    {% trans "about.values.creativity.description" %}
+                </p>
+            </div>
+
+            <!-- Communauté -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">🤝</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    {% trans "about.values.community.title" %}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    {% trans "about.values.community.description" %}
+                </p>
+            </div>
+
+            <!-- Innovation -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl">🚀</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    {% trans "about.values.innovation.title" %}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                    {% trans "about.values.innovation.description" %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistiques -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            {% trans "about.stats.title" %}
+        </h2>
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl p-6 text-white text-center">
+                <div class="text-3xl font-bold mb-2">{{ total_articles }}</div>
+                <div class="text-blue-100">{% trans "about.stats.articles" %}</div>
+            </div>
+            <div class="bg-gradient-to-r from-green-500 to-blue-500 rounded-xl p-6 text-white text-center">
+                <div class="text-3xl font-bold mb-2">{{ total_authors }}</div>
+                <div class="text-green-100">{% trans "about.stats.authors" %}</div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white text-center">
+                <div class="text-3xl font-bold mb-2">{{ total_views }}</div>
+                <div class="text-purple-100">{% trans "about.stats.views" %}</div>
+            </div>
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 text-white text-center">
+                <div class="text-3xl font-bold mb-2">{{ total_comments }}</div>
+                <div class="text-orange-100">{% trans "about.stats.comments" %}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Équipe -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            {% trans "about.team.title" %}
+        </h2>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+            <div class="text-center">
+                <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-4xl">👥</span>
+                </div>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+                    {% trans "about.team.description.title" %}
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                    {% trans "about.team.description.text" %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Technologie -->
+    <section class="mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-8">
+            {% trans "about.technology.title" %}
+        </h2>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-xl">🐍</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Django</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300">
+                    {% trans "about.technology.django" %}
+                </p>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-xl">💨</span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Tailwind CSS</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300">
+                    {% trans "about.technology.tailwind" %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="text-center">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+            <h2 class="text-3xl font-bold mb-4">
+                {% trans "about.cta.title" %}
+            </h2>
+            <p class="text-xl mb-6 text-blue-100">
+                {% trans "about.cta.description" %}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'blog:articles:create' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                        <span class="mr-2">✍️</span>
+                        {% trans "about.cta.write_article" %}
+                    </a>
+                {% else %}
+                    <a href="{% url 'blog:login' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                        <span class="mr-2">👤</span>
+                        {% trans "about.cta.join" %}
+                    </a>
+                {% endif %}
+                <a href="{% url 'blog:articles:list' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors duration-200">
+                    <span class="mr-2">📚</span>
+                    {% trans "about.cta.explore" %}
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

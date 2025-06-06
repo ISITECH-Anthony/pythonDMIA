@@ -1,0 +1,101 @@
+<!-- Composant carte d'auteur -->
+<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 transform" 
+     data-category="all" data-articles="{{ author.get_published_articles_count }}" data-name="{{ author.get_full_name }}">
+    
+    <!-- En-tête de la carte avec dégradé -->
+    <div class="bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 p-6 text-center relative transition-colors duration-300">
+        <a href="{% url 'blog:author_detail' author.pk %}" class="block">
+            {% if author.avatar %}
+                <img src="{{ author.avatar.url }}" 
+                     alt="{{ author.get_full_name }}" 
+                     class="h-20 w-20 rounded-full mx-auto mb-4 object-cover border-4 border-white dark:border-gray-200 shadow-lg hover:scale-110 transition-transform duration-200">
+            {% else %}
+                <div class="bg-white dark:bg-gray-100 rounded-full h-20 w-20 mx-auto mb-4 flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200">
+                    <span class="text-2xl font-bold text-gray-700 dark:text-gray-800">{{ author.get_initials }}</span>
+                </div>
+            {% endif %}
+            <h3 class="text-xl font-bold text-white mb-1 hover:text-blue-100 dark:hover:text-blue-200 transition-colors">{{ author.get_full_name }}</h3>
+        </a>
+        <p class="text-blue-200 dark:text-blue-300 text-sm mb-2">@{{ author.username }}</p>
+        <p class="text-blue-100 dark:text-blue-200 text-sm">
+            {% if author.bio %}
+                {{ author.bio|truncatewords:3 }}
+            {% else %}
+                Auteur BlogHub
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Contenu de la carte -->
+    <div class="p-6">
+        <!-- Bio courte -->
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 leading-relaxed">
+            {% if author.bio %}
+                {{ author.bio|truncatewords:20 }}
+            {% else %}
+                Passionné par l'écriture et le partage de connaissances, cet auteur contribue régulièrement à notre communauté avec des articles de qualité.
+            {% endif %}
+        </p>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="text-center">
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ author.get_published_articles_count }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Articles</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {{ author.get_total_views }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Vues</p>
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {{ author.get_total_likes }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Likes</p>
+            </div>
+        </div>
+
+        <!-- Système de badges (rien de trop sérieux, juste pour le fun) -->
+        <div class="flex flex-wrap gap-2 mb-4">
+            {% if author.get_published_articles_count > 0 %}
+            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium transition-colors duration-300">Écriture</span>
+            {% endif %}
+            {% if author.get_published_articles_count > 2 %}
+            <span class="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs font-medium transition-colors duration-300">Blog</span>
+            {% endif %}
+            {% if author.get_published_articles_count > 5 %}
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-full text-xs font-medium transition-colors duration-300">Expert</span>
+            {% endif %}
+        </div>
+
+        <!-- Dernier article -->
+        {% if author.get_latest_published_article %}
+            <a href="{% url 'blog:articles:detail' author.get_latest_published_article.slug %}" class="group">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-4 transition-colors duration-300">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Dernier article</p>
+                    <h4 class="font-medium text-gray-900 dark:text-white text-sm mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">{{ author.get_latest_published_article.title|truncatechars:50 }}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ author.get_latest_published_article.published_at|timesince }} • {{ author.get_latest_published_article.word_count }} mots</p>
+                </div>
+            </a>
+        {% else %}
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-4 transition-colors duration-300">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Nouveau membre</p>
+                <h4 class="font-medium text-gray-900 dark:text-white text-sm mb-1">Aucun article publié pour le moment</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Membre depuis {{ author.date_joined|timesince }}</p>
+            </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="flex items-center justify-center">
+            <a href="{% url 'blog:author_detail' author.pk %}" 
+               class="flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                Voir le profil
+            </a>
+        </div>
+    </div>
+</div>

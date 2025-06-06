@@ -1,0 +1,627 @@
+{% extends "blog/layouts/base.html" %}
+{% load i18n %}
+{% load article_tags %}
+
+{% block title %}{% trans "Tableau de bord" %} | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dashboard-section {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .article-card-dashboard {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .article-card-dashboard:hover {
+        border-left: 4px solid #3B82F6;
+        transform: translateX(5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- En-tête du tableau de bord -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 rounded-3xl text-white mb-8 overflow-hidden">
+        <div class="px-8 md:px-12 py-12 md:py-16">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                        📊 Tableau de bord
+                    </h1>
+                    <p class="text-xl text-blue-100 mb-6">
+                        Bonjour {{ user.first_name|default:user.username }}, voici un aperçu de votre activité
+                    </p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'blog:users:profile' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl transition-all duration-200">
+                        <span class="mr-2">👤</span>
+                        Mon profil
+                    </a>
+                    <a href="{% url 'blog:articles:create' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-100 text-blue-600 rounded-xl transition-all duration-200 font-semibold">
+                        <span class="mr-2">✍️</span>
+                        Écrire un article
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de la semaine -->
+    <div class="dashboard-section mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <span class="mr-3">📈</span>
+            Statistiques de la semaine
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <!-- Likes reçus cette semaine -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-red-100 dark:bg-red-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">{{ week_stats.likes }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Likes reçus</p>
+            </div>
+
+            <!-- Bookmarks reçus cette semaine -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">{{ week_stats.bookmarks }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Favoris ajoutés</p>
+            </div>
+
+            <!-- Commentaires reçus cette semaine -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-green-100 dark:bg-green-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{{ week_stats.comments }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Commentaires reçus</p>
+            </div>
+
+            <!-- Vues cette semaine -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-purple-100 dark:bg-purple-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">{{ week_stats.views }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Vues reçues</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques globales -->
+    <div class="dashboard-section mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <span class="mr-3">🏆</span>
+            Statistiques globales
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <!-- Articles publiés -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-blue-100 dark:bg-blue-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ total_stats.published_articles }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Articles publiés</p>
+                {% if total_stats.draft_articles > 0 %}
+                    <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">+ {{ total_stats.draft_articles }} brouillon{{ total_stats.draft_articles|pluralize }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Total des likes -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-red-100 dark:bg-red-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">{{ total_stats.total_likes }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total likes reçus</p>
+            </div>
+
+            <!-- Total des vues -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                <div class="bg-purple-100 dark:bg-purple-900/30 rounded-full p-3 mx-auto mb-3 w-12 h-12 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </div>
+                <p class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">{{ total_stats.total_views }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Total vues</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section des articles -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Articles que j'ai likés -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">❤️</span>
+                Articles que j'ai aimés
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if liked_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in liked_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:detail' article.slug %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Par <span class="font-medium">{{ article.author.get_full_name }}</span>
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                                </svg>
+                                                {{ article.likes.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                                                </svg>
+                                                {{ article.comments.count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if liked_articles.count >= 10 %}
+                        <div class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+                            <a href="{% url 'blog:articles:list' %}" 
+                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                Voir tous mes articles aimés →
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">💔</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Aucun article aimé</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Découvrez du contenu intéressant et likez les articles qui vous plaisent !</p>
+                        <a href="{% url 'blog:articles:list' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <span class="mr-2">🔍</span>
+                            Découvrir des articles
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Articles que j'ai bookmarkés -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">🔖</span>
+                Mes articles favoris
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if bookmarked_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in bookmarked_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:detail' article.slug %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Par <span class="font-medium">{{ article.author.get_full_name }}</span>
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                                </svg>
+                                                {{ article.bookmarks.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                                                </svg>
+                                                {{ article.comments.count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if bookmarked_articles.count >= 10 %}
+                        <div class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+                            <a href="{% url 'blog:articles:list' %}" 
+                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                Voir tous mes favoris →
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">📚</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Aucun favori</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Ajoutez des articles à vos favoris pour les retrouver facilement !</p>
+                        <a href="{% url 'blog:articles:list' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors">
+                            <span class="mr-2">🔍</span>
+                            Découvrir des articles
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mes articles récents et populaires -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Mes articles récents -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">📝</span>
+                Mes articles récents
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if my_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in my_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:detail' article.slug %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Publié le {{ article.published_at|date:"d M Y" }}
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                                </svg>
+                                                {{ article.likes.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                                {{ article.unique_views.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                                                </svg>
+                                                {{ article.comments.count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+                        <a href="{% url 'blog:articles:list' %}?author={{ user.id }}" 
+                           class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                            Voir tous mes articles →
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">📝</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Aucun article publié</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Commencez à partager vos idées avec la communauté !</p>
+                        <a href="{% url 'blog:articles:create' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <span class="mr-2">✍️</span>
+                            Écrire mon premier article
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mes articles les plus populaires -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">🏆</span>
+                Mes articles populaires
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if popular_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in popular_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:detail' article.slug %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Publié le {{ article.published_at|date:"d M Y" }}
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                                </svg>
+                                                {{ article.total_likes }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                                {{ article.total_views }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                                                </svg>
+                                                {{ article.total_comments }}
+                                            </span>
+                                        </div>
+                                        {% if forloop.first %}
+                                            <div class="mt-2">
+                                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full">
+                                                    <span class="mr-1">👑</span>
+                                                    Article le plus populaire
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">📊</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Pas encore d'articles populaires</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Continuez à écrire et vos articles gagneront en popularité !</p>
+                        <a href="{% url 'blog:articles:create' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                            <span class="mr-2">✍️</span>
+                            Écrire un article
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mes articles en brouillons et dépubliés -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Mes articles en brouillons -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">📝</span>
+                Mes brouillons
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if draft_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in draft_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:edit' article.id %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Créé le {{ article.created_at|date:"d M Y" }}
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full">
+                                                📝 Brouillon
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                </svg>
+                                                {{ article.word_count }} mots
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if draft_articles.count >= 10 %}
+                        <div class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+                            <a href="{% url 'blog:articles:list' %}?author={{ user.id }}&status=draft" 
+                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                Voir tous mes brouillons →
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">📝</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Aucun brouillon</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Commencez à écrire un nouvel article !</p>
+                        <a href="{% url 'blog:articles:create' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                            <span class="mr-2">✍️</span>
+                            Écrire un article
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mes articles dépubliés -->
+        <div class="dashboard-section">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <span class="mr-3">📚</span>
+                Articles dépubliés
+            </h2>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {% if unpublished_articles %}
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for article in unpublished_articles %}
+                            <div class="article-card-dashboard p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <div class="flex items-start space-x-4">
+                                    {% if article.image %}
+                                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                                             class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+                                    {% else %}
+                                        <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">{{ article.category.icon }}</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                            <a href="{% url 'blog:articles:edit' article.id %}" 
+                                               class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                {{ article.title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Publié le {{ article.published_at|date:"d M Y" }} • Dépublié le {{ article.updated_at|date:"d M Y" }}
+                                        </p>
+                                        <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded-full">
+                                                🚫 Dépublié
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                                </svg>
+                                                {{ article.likes.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                                {{ article.unique_views.count }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.418 8-9 8a9.003 9.003 0 01-5.092-1.524L3 20l1.524-3.908A9.003 9.003 0 013 12c0-4.418 4.418-8 9-8s9 3.582 9 8z"/>
+                                                </svg>
+                                                {{ article.comments.count }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if unpublished_articles.count >= 10 %}
+                        <div class="p-4 text-center border-t border-gray-100 dark:border-gray-700">
+                            <a href="{% url 'blog:articles:list' %}?author={{ user.id }}&status=unpublished" 
+                               class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                Voir tous mes articles dépubliés →
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">✅</div>
+                        <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">Aucun article dépublié</h4>
+                        <p class="text-gray-500 dark:text-gray-500 mb-4">Tous vos articles publiés sont encore en ligne !</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

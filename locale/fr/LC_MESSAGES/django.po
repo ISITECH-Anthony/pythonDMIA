@@ -1,0 +1,282 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BlogHub\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-05 13:08+0200\n"
+"PO-Revision-Date: 2024-06-05 10:00+0000\n"
+"Last-Translator: BlogHub Team\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# Navigation
+#: blog/templates/blog/layouts/base.html:55
+#: blog/templates/blog/layouts/base.html:245
+#: blog/templates/blog/layouts/base.html:301
+msgid "nav.home"
+msgstr "Accueil"
+
+#: blog/templates/blog/layouts/base.html:61
+#: blog/templates/blog/layouts/base.html:249
+msgid "nav.articles"
+msgstr "Articles"
+
+#: blog/templates/blog/layouts/base.html:67
+#: blog/templates/blog/layouts/base.html:253
+msgid "nav.authors"
+msgstr "Auteurs"
+
+#: blog/templates/blog/layouts/base.html:73
+#: blog/templates/blog/layouts/base.html:257
+msgid "nav.categories"
+msgstr "Catégories"
+
+#: blog/templates/blog/layouts/base.html:79
+#: blog/templates/blog/layouts/base.html:261
+msgid "nav.about"
+msgstr "À propos"
+
+# Buttons
+#: blog/templates/blog/layouts/base.html:136
+msgid "button.write"
+msgstr "Écrire"
+
+# User menu
+#: blog/templates/blog/layouts/base.html:167
+msgid "user.profile"
+msgstr "Profil"
+
+#: blog/templates/blog/layouts/base.html:168
+msgid "user.dashboard"
+msgstr "Tableau de bord"
+
+# Theme
+#: blog/templates/blog/layouts/base.html:175
+#: blog/templates/blog/layouts/base.html:269
+#: blog/templates/blog/layouts/base.html:367
+#: blog/templates/blog/layouts/base.html:373
+#: blog/templates/blog/layouts/base.html:379
+msgid "theme.dark_mode"
+msgstr "Mode sombre"
+
+# Admin
+#: blog/templates/blog/layouts/base.html:181
+msgid "admin.panel"
+msgstr "Administration"
+
+#: blog/templates/blog/layouts/base.html:186
+msgid "auth.logout"
+msgstr "Déconnexion"
+
+# Authentication
+#: blog/templates/blog/layouts/base.html:233
+msgid "auth.login"
+msgstr "Connexion"
+
+# Footer
+#: blog/templates/blog/layouts/base.html:293
+msgid "footer.description"
+msgstr ""
+"Une plateforme moderne pour partager vos idées et connecter avec une "
+"communauté passionnée."
+
+#: blog/templates/blog/layouts/base.html:297
+msgid "footer.navigation"
+msgstr "Navigation"
+
+#: blog/templates/blog/layouts/base.html:306
+msgid "footer.write_article"
+msgstr "Écrire un article"
+
+#: blog/templates/blog/layouts/base.html:312
+msgid "footer.connect"
+msgstr "Connectez-vous"
+
+#: blog/templates/blog/layouts/base.html:331
+msgid "footer.copyright"
+msgstr "&copy; 2024 BlogHub. Créé avec ❤️ et Django + Tailwind CSS."
+
+#: blog/templates/blog/layouts/base.html:367
+#: blog/templates/blog/layouts/base.html:373
+#: blog/templates/blog/layouts/base.html:379
+msgid "theme.light_mode"
+msgstr "Mode clair"
+
+#: blog/templates/blog/pages/home.html:4
+msgid "Accueil"
+msgstr "Accueil"
+
+#: blog/templates/blog/pages/home.html:14
+msgid "home.discover_our"
+msgstr "Découvrez nos"
+
+#: blog/templates/blog/pages/home.html:15
+msgid "home.articles"
+msgstr "Articles"
+
+#: blog/templates/blog/pages/home.html:20
+msgid "home.subtitle_description"
+msgstr ""
+"Explorez une collection d'articles passionnants, partagez vos idées et "
+"rejoignez notre communauté de créateurs."
+
+#: blog/templates/blog/pages/home.html:27
+msgid "home.search_placeholder"
+msgstr "Rechercher un article, un auteur, un sujet..."
+
+#: blog/templates/blog/pages/home.html:55
+msgid "home.stats_articles"
+msgstr "Articles"
+
+#: blog/templates/blog/pages/home.html:57
+msgid "home.stats_published"
+msgstr "publiés"
+
+#: blog/templates/blog/pages/home.html:72
+msgid "home.stats_authors"
+msgstr "Auteurs"
+
+#: blog/templates/blog/pages/home.html:74
+msgid "home.stats_active"
+msgstr "actifs"
+
+#: blog/templates/blog/pages/home.html:91
+msgid "home.stats_readers"
+msgstr "Lecteurs"
+
+#: blog/templates/blog/pages/home.html:93
+msgid "home.stats_this_month"
+msgstr "ce mois"
+
+#: blog/templates/blog/pages/home.html:108
+msgid "home.stats_comments"
+msgstr "Commentaires"
+
+#: blog/templates/blog/pages/home.html:110
+msgid "home.stats_exchanges"
+msgstr "échanges"
+
+#: blog/templates/blog/pages/home.html:120
+msgid "home.recent_articles"
+msgstr "Articles récents"
+
+#: blog/templates/blog/pages/home.html:134
+#: blog/templates/blog/pages/home.html:154
+msgid "home.view_all_articles"
+msgstr "Voir tous les articles"
+
+#: blog/templates/blog/pages/home.html:140
+msgid "home.popular_articles"
+msgstr "Articles populaires"
+
+#: blog/templates/blog/pages/home.html:163
+msgid "home.no_articles_yet"
+msgstr "Aucun article pour le moment"
+
+#: blog/templates/blog/pages/home.html:164
+msgid "home.be_first_to_create"
+msgstr "Soyez le premier à créer du contenu et à partager vos idées !"
+
+#: blog/templates/blog/pages/home.html:170
+msgid "home.write_first_article"
+msgstr "Écrire votre premier article"
+
+#: blog/templates/blog/pages/home.html:176
+msgid "home.login_to_write"
+msgstr "Se connecter pour écrire"
+
+# About page
+msgid "about.title"
+msgstr "À propos de BlogHub"
+
+msgid "about.subtitle"
+msgstr "Découvrez notre histoire, notre mission et les valeurs qui nous animent dans cette aventure passionnante."
+
+msgid "about.mission.title"
+msgstr "Notre Mission"
+
+msgid "about.mission.description"
+msgstr "BlogHub a été créé avec pour mission de démocratiser l'écriture et de donner à chacun une voix dans le monde numérique. Nous croyons que chaque personne a une histoire unique à raconter et des connaissances précieuses à partager. Notre plateforme offre un espace bienveillant où les créateurs de contenu peuvent s'exprimer librement, apprendre les uns des autres et construire des liens authentiques avec leur audience."
+
+msgid "about.vision.title"
+msgstr "Notre Vision"
+
+msgid "about.vision.description"
+msgstr "Nous imaginons un monde où la création de contenu de qualité est accessible à tous, indépendamment du niveau technique ou des ressources financières. BlogHub aspire à devenir la référence des plateformes de blog, en alliant simplicité d'utilisation, design moderne et fonctionnalités avancées. Notre vision est de créer un écosystème où l'innovation, la créativité et la collaboration se rencontrent pour donner naissance à des contenus exceptionnels."
+
+msgid "about.values.title"
+msgstr "Nos Valeurs"
+
+msgid "about.values.creativity.title"
+msgstr "Créativité"
+
+msgid "about.values.creativity.description"
+msgstr "Nous encourageons l'expression créative sous toutes ses formes et offrons les outils nécessaires pour donner vie aux idées les plus audacieuses."
+
+msgid "about.values.community.title"
+msgstr "Communauté"
+
+msgid "about.values.community.description"
+msgstr "Nous cultivons un environnement inclusif où chaque membre peut apprendre, partager et grandir ensemble dans le respect mutuel."
+
+msgid "about.values.innovation.title"
+msgstr "Innovation"
+
+msgid "about.values.innovation.description"
+msgstr "Nous investissons continuellement dans les dernières technologies pour offrir une expérience utilisateur exceptionnelle et des fonctionnalités de pointe."
+
+msgid "about.stats.title"
+msgstr "BlogHub en Chiffres"
+
+msgid "about.stats.articles"
+msgstr "Articles publiés"
+
+msgid "about.stats.authors"
+msgstr "Auteurs actifs"
+
+msgid "about.stats.views"
+msgstr "Vues totales"
+
+msgid "about.stats.comments"
+msgstr "Commentaires échangés"
+
+msgid "about.team.title"
+msgstr "Notre Équipe"
+
+msgid "about.team.description.title"
+msgstr "Une équipe passionnée"
+
+msgid "about.team.description.text"
+msgstr "Derrière BlogHub se trouve une équipe de développeurs, designers et créateurs de contenu unis par la passion de l'innovation et de la qualité. Nous travaillons chaque jour pour améliorer votre expérience et vous offrir les meilleurs outils pour exprimer votre créativité. Notre diversité d'expertises et notre engagement commun font de BlogHub une plateforme en constante évolution."
+
+msgid "about.technology.title"
+msgstr "Technologies Utilisées"
+
+msgid "about.technology.django"
+msgstr "Framework web robuste et sécurisé, Django nous permet de construire une plateforme stable et évolutive."
+
+msgid "about.technology.tailwind"
+msgstr "Framework CSS utilitaire qui nous aide à créer une interface moderne, responsive et personnalisable."
+
+msgid "about.cta.title"
+msgstr "Rejoignez l'Aventure BlogHub"
+
+msgid "about.cta.description"
+msgstr "Que vous soyez un écrivain en herbe ou un créateur expérimenté, BlogHub vous offre tous les outils pour partager vos passions."
+
+msgid "about.cta.write_article"
+msgstr "Écrire un article"
+
+msgid "about.cta.join"
+msgstr "Rejoindre la communauté"
+
+msgid "about.cta.explore"
+msgstr "Explorer les articles"

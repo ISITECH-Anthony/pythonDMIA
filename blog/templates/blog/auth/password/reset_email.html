@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation de votre mot de passe - BlogHub</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 64px;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #1f2937;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin: 0 0 30px 0;
+            font-size: 16px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .warning-title {
+            color: #92400e;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        .warning-text {
+            color: #b45309;
+            margin: 0;
+            font-size: 14px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .link-fallback {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔑</div>
+            <h1>Réinitialisation de mot de passe</h1>
+            <p class="subtitle">Vous avez demandé la réinitialisation de votre mot de passe BlogHub</p>
+        </div>
+
+        <div class="content">
+            <p>Bonjour,</p>
+            
+            <p>Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte BlogHub. Si vous êtes à l'origine de cette demande, cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ protocol }}://{{ domain }}{% url 'blog:password_reset_confirm' uidb64=uid token=token %}" class="button">
+                    Réinitialiser mon mot de passe
+                </a>
+            </div>
+
+            <div class="warning">
+                <p class="warning-title">⚠️ Important :</p>
+                <p class="warning-text">Ce lien expirera dans 24 heures pour des raisons de sécurité. Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email en toute sécurité.</p>
+            </div>
+
+            <p>Si vous avez des difficultés avec le bouton ci-dessus, vous pouvez copier et coller le lien suivant dans votre navigateur :</p>
+            
+            <div class="link-fallback">
+                {{ protocol }}://{{ domain }}{% url 'blog:password_reset_confirm' uidb64=uid token=token %}
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>BlogHub</strong> - Votre plateforme de blog</p>
+            <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+        </div>
+    </div>
+</body>
+</html>

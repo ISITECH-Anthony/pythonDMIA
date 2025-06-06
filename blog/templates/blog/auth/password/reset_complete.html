@@ -1,0 +1,69 @@
+{% extends "blog/layouts/base.html" %}
+
+{% block title %}Mot de passe réinitialisé - BlogHub{% endblock %}
+
+{% block header_class %}bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors duration-300{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-400 dark:to-emerald-500 text-white text-2xl mb-6">
+                ✅
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">
+                Mot de passe réinitialisé !
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
+                Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+            </p>
+        </div>
+
+        <!-- Confirmation -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-600 p-8 transition-colors duration-300">
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4 mb-6 transition-colors duration-300">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400 dark:text-green-300 transition-colors duration-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-green-800 dark:text-green-300 transition-colors duration-300">
+                            Réinitialisation réussie
+                        </h3>
+                        <div class="mt-2 text-sm text-green-700 dark:text-green-400 transition-colors duration-300">
+                            <p>Votre compte est maintenant sécurisé avec votre nouveau mot de passe.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conseils de sécurité -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4 mb-6 transition-colors duration-300">
+                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 transition-colors duration-300">Pour votre sécurité :</h4>
+                <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 transition-colors duration-300">
+                    <li>• Gardez votre mot de passe confidentiel</li>
+                    <li>• Déconnectez-vous des appareils publics</li>
+                    <li>• Changez régulièrement votre mot de passe</li>
+                    <li>• Activez l'authentification à deux facteurs si disponible</li>
+                </ul>
+            </div>
+
+            <!-- Bouton de connexion -->
+            <div class="text-center space-y-4">
+                <a href="{% url 'blog:login' %}" 
+                   class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 dark:from-green-500 dark:to-emerald-500 dark:hover:from-green-600 dark:hover:to-emerald-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg inline-block">
+                    Se connecter maintenant
+                </a>
+                
+                <p class="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                    <a href="{% url 'blog:home' %}" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors duration-200">
+                        Retour à l'accueil
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
